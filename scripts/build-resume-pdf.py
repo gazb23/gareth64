@@ -284,7 +284,7 @@ def build_resume(content: dict[str, Any], output_path: Path) -> None:
                     link(f"mailto:{content['email']}", content["email"]),
                     link(links["linkedin"], "LinkedIn"),
                     link(links["github"], "GitHub"),
-                    link(links["site"], "Portfolio"),
+                    link(links["site"], "garethbeall.com"),
                 ]
             ),
             styles["contact"],
