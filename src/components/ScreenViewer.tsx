@@ -8,7 +8,7 @@ import styles from "./gareth64.module.css";
 
 const LOAD_STEPS = [
   "DIALING REMOTE HOST",
-  "CARRIER DETECTED — 300 BAUD",
+  "CARRIER DETECTED AT 300 BAUD",
   "NEGOTIATING PROTOCOL",
   "RENDERING TRANSMISSION",
 ] as const;
@@ -37,7 +37,7 @@ export function ScreenViewer({ view, reducedMotion, onClose }: ScreenViewerProps
         <span className={styles.viewerTitle}>{view.label}</span>
         <span className={styles.viewerActions}>
           <a href={view.pageUrl} target="_blank" rel="noreferrer">POP OUT ↗</a>
-          <button type="button" onClick={onClose}>CLOSE [ESC]</button>
+          <button type="button" onClick={onClose}>CLOSE</button>
         </span>
       </div>
       {live ? (

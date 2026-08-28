@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,7 +13,8 @@ const outputPath = join(outputDirectory, siteContent.resume.fileName);
 const publicPath = join(projectRoot, "public", siteContent.resume.fileName);
 const scratchDirectory = mkdtempSync(join(tmpdir(), "gareth64-resume-"));
 const contentPath = join(scratchDirectory, "site-content.json");
-const python = process.env.CODEX_PDF_PYTHON ?? "python3";
+const venvPython = join(projectRoot, ".venv", "bin", "python3");
+const python = process.env.CODEX_PDF_PYTHON ?? (existsSync(venvPython) ? venvPython : "python3");
 
 mkdirSync(outputDirectory, { recursive: true });
 mkdirSync(dirname(publicPath), { recursive: true });

@@ -10,7 +10,6 @@ export function QuickView({ compact = false }: QuickViewProps) {
   return (
     <article className={`${styles.view} ${compact ? styles.compact : ""}`} aria-label="Gareth Beall résumé quick view">
       <header className={styles.hero} id="about">
-        <p className={styles.kicker}>Clinical judgment × production AI</p>
         <h1>{siteContent.name}</h1>
         <p className={styles.headline}>{siteContent.headline}</p>
         <p className={styles.introduction}>{siteContent.introduction}</p>
@@ -68,8 +67,8 @@ export function QuickView({ compact = false }: QuickViewProps) {
       </section>
 
       <section className={styles.closing} id="contact">
-        <p className={styles.sectionLabel}>The useful next step</p>
-        <h2>Bring me the problem that needs both judgment and engineering.</h2>
+        <p className={styles.sectionLabel}>Contact</p>
+        <h2>Let&#39;s talk.</h2>
         <p>{siteContent.location}</p>
         <a href={`mailto:${siteContent.email}`}>{siteContent.email}</a>
       </section>

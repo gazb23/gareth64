@@ -138,7 +138,7 @@ export function useTerminal({ reducedMotion }: { readonly reducedMotion: boolean
   const endStream = useCallback(() => {
     const current = streamRef.current;
     streamRef.current = null;
-    if (current) dispatchBuffer({ type: "commit", lines: [{ kind: "text", text: current }] });
+    if (current) dispatchBuffer({ type: "commit", lines: [{ kind: "text", text: current, tone: "bright" }] });
     setStreamText(null);
   }, []);
 
@@ -151,7 +151,7 @@ export function useTerminal({ reducedMotion }: { readonly reducedMotion: boolean
           : buffer.printing.line,
       );
     }
-    if (streamText !== null) visible.push({ kind: "text", text: streamText });
+    if (streamText !== null) visible.push({ kind: "text", text: streamText, tone: "bright" });
     return visible;
   }, [buffer, streamText]);
 

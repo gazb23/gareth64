@@ -3,15 +3,15 @@ export const siteContent = {
   shortName: "Gareth",
   headline: "Lead AI/ML Engineer",
   differentiator:
-    "Clinical pharmacist turned AI engineer, building retrieval systems that can survive real governance, safety, and operational constraints.",
+    "Clinical pharmacist turned AI engineer. I ship RAG in healthcare, where safety and evals are non-negotiable and every pipeline stage has to survive scrutiny.",
   introduction:
-    "I build production AI systems for work where evidence matters. My unusual advantage is that I understand both sides of the interface: fifteen years of clinical pharmacy, including intensive care, and the engineering needed to turn retrieval, evaluation, inference, safety, and release processes into a dependable product.",
+    "I build production AI systems for work where evidence matters. My advantage is that I understand both sides: fifteen years of clinical pharmacy, including intensive care, and six years of AI/ML engineering. I've been building software since I was twelve.",
   location: "Sunshine Coast, Queensland, Australia",
   email: "gareth.beall@gmail.com",
   links: {
     linkedin: "https://www.linkedin.com/in/gareth-beall-835517321/",
     github: "https://github.com/gazb23",
-    work: "https://inkyhealth.com/work",
+    site: "https://garethbeall.com",
     opioid: "https://www.opioidconversioncalculator.com",
     namely: "https://namelyapp.com",
     restoredPhoto: "https://www.myrestoredphoto.com",
@@ -21,7 +21,7 @@ export const siteContent = {
     {
       eyebrow: "Clinical AI",
       title: "Built IRIS from idea to governed delivery",
-      text: "Led the engineering of a public-sector clinical RAG system through ingestion, retrieval, reranking, evaluation, self-hosted inference, safety controls, UAT, release, and operations.",
+      text: "A clinical RAG system for Queensland Health. I took it from first prototype to governed release, and tuned every pipeline stage until clinicians could rely on it.",
     },
     {
       eyebrow: "Rare context",
@@ -31,25 +31,25 @@ export const siteContent = {
     {
       eyebrow: "Product instinct",
       title: "Ships tools, not demonstrations",
-      text: "Built and operated products spanning clinical calculators, consumer apps, photographic restoration, and small AI experiments.",
+      text: "Built and ran clinical calculators, consumer apps, photo restoration, and small AI experiments. All of them shipped to real users.",
     },
   ],
   iris: {
     name: "IRIS",
     label: "Clinical AI assistant for Queensland Health",
     summary:
-      "IRIS is an AI assistant Gareth conceived and built for clinicians at Queensland Health. Staff ask a question in plain language and IRIS answers from the health service's own approved documents — showing the exact sources behind every answer, and saying so honestly when the evidence isn't there.",
+      "IRIS is an AI assistant Gareth conceived and built for clinicians at Queensland Health. Staff ask a question in plain language and IRIS answers from the health service's own approved documents. Every answer shows its exact sources, and when the evidence isn't there, IRIS says so.",
     chapters: [
       ["What it does", "Answers clinical questions from approved local documents, with the supporting passages shown beside every answer."],
-      ["How it works", "Documents are ingested and checked, search combines exact keywords with meaning-based matching, and the best passages are re-ranked before the answer is written."],
+      ["How it works", "IRIS checks every document it ingests, searches by exact keywords and by meaning, and re-ranks the best passages before it writes an answer."],
       ["Runs in-house", "The AI models run on the hospital's own GPU servers, so sensitive data never leaves the network."],
-      ["Built to be safe", "Tested against realistic clinical questions — including ones it should refuse — with guardrails and honest \"I don't know\" behaviour instead of confident guessing."],
+      ["Built to be safe", "Tested against realistic clinical questions, including ones it should refuse. An honest \"I don't know\" beats confident guessing."],
       ["Delivered for real", "Security review, user acceptance testing with clinicians, controlled releases, monitoring, and ongoing operations."],
     ] as const,
     video: {
       page: "https://vimeo.com/1093612016",
       embed: "https://player.vimeo.com/video/1093612016",
-      note: "Filmed during the pilot — an earlier build of IRIS.",
+      note: "Filmed during the pilot, on an earlier build of IRIS.",
     },
   },
   products: [
@@ -57,7 +57,7 @@ export const siteContent = {
       name: "Opioid Conversion Calculator",
       role: "Clinical product",
       description:
-        "A medication-safety tool for health professionals: specialist opioid-conversion knowledge in a focused, dependable interface.",
+        "A medication-safety tool that puts specialist opioid-conversion knowledge into a focused, dependable interface for health professionals.",
       href: "https://www.opioidconversioncalculator.com",
       viewId: "OPIOID",
       embeddable: true,
@@ -75,7 +75,7 @@ export const siteContent = {
       name: "Namely",
       role: "Consumer product",
       description:
-        "A baby-name discovery app built around playful exploration and preference signals rather than endless lists.",
+        "A baby-name app that learns what you like as you swipe, instead of handing you an endless list.",
       href: "https://namelyapp.com",
       viewId: "NAMELY",
       embeddable: true,
@@ -84,7 +84,7 @@ export const siteContent = {
       name: "My Restored Photo",
       role: "AI product",
       description:
-        "AI photo restoration for something people immediately understand: recovering a damaged photograph that matters to them.",
+        "AI photo restoration. Send a damaged photograph that matters to you, get it back repaired.",
       href: "https://www.myrestoredphoto.com",
       viewId: "PHOTO",
       embeddable: false,
@@ -93,11 +93,13 @@ export const siteContent = {
   resume: {
     fileName: "Gareth_Beall_Lead_AI_ML_Engineer_Resume.pdf",
     profile:
-      "Lead AI/ML engineer and clinical pharmacist with fifteen years of clinical practice, including intensive care. I build production AI systems for settings where evidence, safety, governance, and operational reliability matter.",
+      "Lead AI/ML engineer with six years of hands-on AI and machine-learning engineering, and fifteen years of clinical pharmacy practice, including intensive care. Many people have built RAG applications; very few have shipped one in a healthcare environment, where safety and evaluation are critical and every part of the pipeline has to be scrutinised, picked apart, and tuned to state of the art. That is exactly what I did with IRIS at Queensland Health.",
     capabilities: [
-      ["Clinical AI", "RAG, agent workflows, prompt and tool design, model evaluation, safety controls, and fine-tuning."],
-      ["Retrieval and data", "Hybrid lexical and semantic search, embeddings, vector databases, reranking, PostgreSQL, and object storage."],
-      ["Software and operations", "Python, TypeScript, APIs, workers, queues, vLLM, Linux, Docker, Podman, CI/CD, monitoring, backup, and release management."],
+      ["Clinical RAG", "Retrieval-augmented generation built for healthcare: grounded answers, citation continuity, honest abstention, and traceable evidence at every step."],
+      ["Evaluation and safety", "Clinician-graded and automated evaluation suites, guardrails, scope controls, and prompt-injection defence. Every pipeline stage gets measured before it ships."],
+      ["Retrieval and data", "Hybrid lexical and semantic search, embeddings, vector databases, reranking, OCR and document processing, PostgreSQL, and object storage."],
+      ["Model serving", "Self-hosted inference on GPU infrastructure with vLLM: model loading, concurrency, latency, throughput, health, and fine-tuning."],
+      ["Software and operations", "Python, TypeScript, APIs, workers, queues, Linux, Docker, Podman, CI/CD, monitoring, backup, and release management."],
     ] as const,
     experience: [
       {

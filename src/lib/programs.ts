@@ -20,16 +20,14 @@ export function directoryLines(): TermLine[] {
 /** Boot-time invitation: every career tape as a one-click load. */
 export function tapeMenuLines(): TermLine[] {
   return [
-    text("INSERT A TAPE TO BEGIN — CLICK ONE, OR PICK FROM THE SHELF:", "system"),
-    ...tapes.map((tape) =>
-      command(`${tape.number} ${tape.label} — ${tape.tagline}`, `LOAD "${tape.label}",1`),
-    ),
+    text("INSERT A TAPE TO BEGIN.", "system"),
+    ...tapes.map((tape) => command(`${tape.number}  ${tape.label}`, `LOAD "${tape.label}",1`)),
   ];
 }
 
 export function helpLines(): TermLine[] {
   return [
-    text("GARETH64 BASIC — COMMANDS", "system"),
+    text("GARETH64 BASIC COMMANDS", "system"),
     text("DIR ............ TAPE DIRECTORY"),
     text('LOAD "NAME",1 .. LOAD A TAPE'),
     text("RUN ............ RUN LOADED PROGRAM"),
@@ -43,7 +41,7 @@ export function helpLines(): TermLine[] {
     text("SYS 64738 ...... WARM RESET"),
     gap(),
     text("TIP: F1 = DIR   F3 = LOAD GARETH   F5 = RUN   F7 = HELP", "dim"),
-    text('PLAY: LOAD "PONG",1 THEN RUN — ARROW KEYS MOVE.', "dim"),
+    text('PLAY: LOAD "PONG",1 THEN RUN. ARROW KEYS MOVE.', "dim"),
   ];
 }
 
@@ -59,7 +57,7 @@ export function listingLines(tape: TapeId): TermLine[] {
       "60 GOTO 20 : REM ALWAYS SHIPPING",
     ],
     iris: [
-      `10 REM *** ${label} — CLINICAL AI ***`,
+      `10 REM *** ${label} ***`,
       '20 PRINT "TRACEABLE SOURCES OR IT DIDN\'T HAPPEN"',
       "30 FOR C = 1 TO 5 : GOSUB CHAPTER(C) : NEXT",
       "40 IF CONFIDENT AND WRONG THEN ALARM",
@@ -92,14 +90,15 @@ export function programLines(tape: TapeId): TermLine[] {
       text("GARETH BEALL / PROFILE", "system"),
       gap(),
       text("LEAD AI/ML ENGINEER", "bright"),
-      text("AFTER FIFTEEN YEARS AS A CRITICAL CARE PHARMACIST, HE NOW BUILDS THE AI SYSTEMS HOSPITALS ACTUALLY RUN."),
+      text("AFTER FIFTEEN YEARS AS A CRITICAL CARE PHARMACIST, HE NOW BUILDS THE AI SYSTEMS HOSPITALS ACTUALLY RUN.", "bright"),
       map(),
-      text("* BUILT IRIS — A CLINICAL AI ASSISTANT FOR QUEENSLAND HEALTH.", "dim"),
+      text("* SIX YEARS OBSESSED WITH AI/ML. CODING SINCE AGE 12.", "dim"),
+      text("* BUILT IRIS, THE CLINICAL AI ASSISTANT AT QUEENSLAND HEALTH.", "dim"),
       text("* RUNS THE WHOLE STACK: GPU SERVING, RETRIEVAL, EVALS, RELEASE.", "dim"),
       text("* SHIPS REAL PRODUCTS PEOPLE PAY FOR.", "dim"),
       gap(),
       text("GARETH.AI IS LISTENING.", "system"),
-      text('TYPE ASK "YOUR QUESTION" — OR CLICK ONE:', "dim"),
+      text('TYPE ASK "YOUR QUESTION" OR CLICK ONE:', "dim"),
       ...siteContent.starterQuestions.map((q) => command(`? ${q.toUpperCase()}`, `ASK "${q}"`)),
     ];
   }
@@ -108,13 +107,13 @@ export function programLines(tape: TapeId): TermLine[] {
     return [
       text("IRIS / CLINICAL AI FOR QUEENSLAND HEALTH", "system"),
       gap(),
-      text(siteContent.iris.summary),
+      text(siteContent.iris.summary, "bright"),
       gap(),
       ...siteContent.iris.chapters.flatMap(([title, body]): TermLine[] => [
-        text(`${title.toUpperCase()} — ${body}`, "dim"),
+        text(`${title.toUpperCase()}: ${body}`, "dim"),
       ]),
       gap(),
-      command('> WATCH THE PILOT DEMO — 2 MIN, PLAYS ON THIS SCREEN', 'VIEW "IRIS DEMO"'),
+      command('> WATCH THE 2-MINUTE PILOT DEMO ON THIS SCREEN', 'VIEW "IRIS DEMO"'),
       text(siteContent.iris.video.note.toUpperCase(), "dim"),
     ];
   }
@@ -137,8 +136,6 @@ export function programLines(tape: TapeId): TermLine[] {
     return [
       text("CONTACT / READY", "system"),
       gap(),
-      text("LET'S BUILD SOMETHING USEFUL.", "bright"),
-      gap(),
       link(`EMAIL: ${siteContent.email.toUpperCase()}`, `mailto:${siteContent.email}`),
       link("LINKEDIN PROFILE", siteContent.links.linkedin),
       link("GITHUB: GAZB23", siteContent.links.github),
@@ -151,6 +148,6 @@ export function programLines(tape: TapeId): TermLine[] {
     text("PONG / TAPE 64", "system"),
     gap(),
     text("A C64-STYLE PONG RUNNING ON THIS MACHINE."),
-    text("ARROW KEYS OR MOUSE MOVE — FIRST TO SEVEN — ESC EJECTS.", "dim"),
+    text("ARROW KEYS OR MOUSE. FIRST TO SEVEN. ESC EJECTS.", "dim"),
   ];
 }

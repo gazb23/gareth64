@@ -10,20 +10,20 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 const editorial = Cormorant_Garamond({ variable: "--font-editorial", subsets: ["latin"], display: "swap", weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://gareth64.vercel.app"),
-  title: "Gareth Beall — Lead AI/ML Engineer",
-  description: "An immersive Gareth64 résumé: clinical judgment, production AI engineering, IRIS, and independent products.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://garethbeall.com"),
+  title: "Gareth Beall, Lead AI/ML Engineer",
+  description: "Gareth Beall's resume, running as a playable Commodore 64. Clinical AI engineering, IRIS, and shipped products.",
   applicationName: "Gareth64",
-  authors: [{ name: "Gareth Beall", url: "https://inkyhealth.com/work" }],
+  authors: [{ name: "Gareth Beall", url: "https://github.com/gazb23" }],
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Gareth Beall — Lead AI/ML Engineer",
-    description: "Clinical judgment × production AI, loaded from an original retro computer.",
+    title: "Gareth Beall, Lead AI/ML Engineer",
+    description: "A resume you can play. Boot the machine, load a tape, ask the AI anything.",
     type: "website",
     url: "/",
     siteName: "Gareth64",
   },
-  twitter: { card: "summary_large_image", title: "Gareth64", description: "An immersive résumé for AI/ML engineer Gareth Beall." },
+  twitter: { card: "summary_large_image", title: "Gareth64", description: "Gareth Beall's resume, running on a Commodore 64." },
   robots: { index: true, follow: true },
 };
 

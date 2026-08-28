@@ -26,7 +26,7 @@ export interface KnowledgeChunk {
   readonly evidenceStatus: EvidenceStatus;
 }
 
-const baseUrl = "https://gareth64.vercel.app";
+const baseUrl = "https://garethbeall.com";
 
 function chunk(
   id: KnowledgeChunkId,
@@ -50,11 +50,13 @@ function chunk(
 
 export const knowledgeRegistry = [
   chunk("kb-profile-identity", "profile", "Gareth Beall", ["gareth", "garrett", "garreth", "who is he"], `${siteContent.name} is a Lead AI/ML Engineer based on the Sunshine Coast in Queensland, Australia.`, "#about", "verified-public"),
-  chunk("kb-profile-positioning", "profile", "Professional positioning", ["role", "job", "title", "position"], "Gareth leads with AI and machine-learning engineering. Clinical pharmacy is his differentiator rather than the category he wants to be hired into.", "#about"),
+  chunk("kb-profile-positioning", "profile", "Professional positioning", ["role", "job", "title", "position"], "Gareth leads with AI and machine-learning engineering. Clinical pharmacy is his edge, not the job he is applying for.", "#about"),
   chunk("kb-profile-summary", "profile", "What Gareth builds", ["summary", "overview", "bio"], "Gareth builds production AI systems for settings where evidence, safety, governance, and operational reliability matter.", "#about"),
   chunk("kb-profile-bridge", "profile", "Two sides of the interface", ["unusual", "different", "advantage", "bridge"], "Gareth understands both specialist clinical work and the engineering needed to make AI systems dependable in practice.", "#about"),
   chunk("kb-profile-thinking", "principles", "How Gareth thinks", ["thinking", "approach", "mindset"], "He starts with the real decision, the available evidence, and the failure modes. Architecture follows from those constraints rather than from fashion.", "#principles"),
   chunk("kb-profile-candid", "profile", "Candid introduction", ["personality", "candid", "human"], "Gareth is curious, product-minded, and unusually willing to follow difficult technical work through governance, release, and operations rather than stopping at a prototype.", "#about"),
+
+  chunk("kb-profile-ai-tenure", "profile", "AI/ML experience", ["how long", "ai experience", "ml experience", "six years", "started coding", "age twelve", "games"], "Gareth has worked in AI and machine learning for about six years, and has been obsessed since day one. He has been building software his whole life. He started making games at age twelve.", "#about", "verified-public"),
 
   chunk("kb-clinical-years", "clinical", "Clinical experience", ["pharmacist", "pharmacy", "years", "healthcare"], "Gareth has fifteen years of clinical pharmacy experience.", "#clinical", "verified-public"),
   chunk("kb-clinical-icu", "clinical", "Intensive care", ["icu", "intensive care", "hospital"], "His clinical background includes intensive-care pharmacy, where ambiguity and medication risk have real consequences.", "#clinical", "verified-public"),
@@ -66,6 +68,7 @@ export const knowledgeRegistry = [
   chunk("kb-iris-purpose", "iris", "IRIS purpose", ["iris purpose", "clinical rag", "what is iris"], "IRIS is a clinical retrieval-augmented generation system designed to give users answers grounded in reviewed source material.", "#iris"),
   chunk("kb-iris-leadership", "iris", "Engineering leadership", ["led", "leadership", "team"], "Gareth led engineering work across IRIS retrieval, evaluation, inference, safety, security, UAT, release, and operations.", "#iris"),
   chunk("kb-iris-governance", "iris", "Governed delivery", ["governance", "public sector", "queensland health"], "IRIS was engineered for governed public-sector delivery, where source control, security review, UAT, release evidence, and operational ownership all matter.", "#iris"),
+  chunk("kb-iris-rigour", "iris", "Healthcare-grade rigour", ["rigour", "rigor", "scrutiny", "state of the art", "why is it hard", "healthcare rag", "what makes iris different"], "Many teams build RAG applications. Few ship one in healthcare. Gareth scrutinised, evaluated, and tuned every stage of the IRIS pipeline: ingestion, retrieval, reranking, prompting, inference, safety. Clinical use demands it.", "#iris"),
   chunk("kb-iris-scope", "iris", "Public-safe scope", ["confidential", "private", "source code"], "Public descriptions of IRIS deliberately stay at capability level and exclude protected health-system material, private metrics, and internal implementation details.", "#iris"),
 
   chunk("kb-ingestion-reviewed", "retrieval", "Reviewed ingestion", ["ingestion", "documents", "sources"], "IRIS ingestion starts with reviewed sources and records the information needed to trace processed material back to its origin.", "#iris"),

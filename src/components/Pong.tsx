@@ -194,7 +194,7 @@ export function Pong({ muted, reducedMotion }: PongProps) {
         ctx.fillText(`${state.winner} WINS`, W / 2, H / 2 - 8);
         ctx.fillStyle = "#a29ae0";
         ctx.font = '8px "C64 Pro Mono", monospace';
-        ctx.fillText("SPACE OR CLICK TO REPLAY — ESC EJECTS", W / 2, H / 2 + 12);
+        ctx.fillText("SPACE REPLAYS. ESC EJECTS.", W / 2, H / 2 + 12);
       }
     }
 
@@ -220,7 +220,7 @@ export function Pong({ muted, reducedMotion }: PongProps) {
   }, [reducedMotion]);
 
   return (
-    <div className={styles.gameScreen} role="application" aria-label="Pong — arrow keys or mouse to move, first to seven">
+    <div className={styles.gameScreen} role="application" aria-label="Pong. Arrow keys or mouse to move, first to seven wins.">
       <canvas ref={canvasRef} width={W} height={H} />
     </div>
   );

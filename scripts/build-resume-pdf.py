@@ -283,7 +283,8 @@ def build_resume(content: dict[str, Any], output_path: Path) -> None:
                     escape(content["location"]),
                     link(f"mailto:{content['email']}", content["email"]),
                     link(links["linkedin"], "LinkedIn"),
-                    link(links["work"], "Portfolio"),
+                    link(links["github"], "GitHub"),
+                    link(links["site"], "Portfolio"),
                 ]
             ),
             styles["contact"],
@@ -371,7 +372,13 @@ def build_resume(content: dict[str, Any], output_path: Path) -> None:
                 Paragraph(escape(product["description"]), styles["itemText"]),
             ]
         )
-    product_table = Table([product_cells], colWidths=[58.66 * mm] * 3)
+    # Lay products out two per row so any count fits the page width.
+    per_row = 2
+    cell_width = 176 / per_row
+    product_rows = [product_cells[i : i + per_row] for i in range(0, len(product_cells), per_row)]
+    if len(product_rows[-1]) < per_row:
+        product_rows[-1].extend([""] * (per_row - len(product_rows[-1])))
+    product_table = Table(product_rows, colWidths=[cell_width * mm] * per_row)
     product_table.setStyle(
         TableStyle(
             [
@@ -412,9 +419,13 @@ def build_resume(content: dict[str, Any], output_path: Path) -> None:
         )
     )
     story.extend([education_table, Spacer(1, 8)])
+    interactive_note = (
+        f'THIS RESUME RUNS AS A PLAYABLE COMMODORE 64 AT {link(links["site"], "GARETHBEALL.COM", "#FFFFFF")}. '
+        "LOAD A TAPE, ASK THE AI ANYTHING."
+    )
     story.append(
         Table(
-            [[Paragraph("BRING ME THE PROBLEM THAT NEEDS BOTH JUDGMENT AND ENGINEERING.", styles["band"])]],
+            [[Paragraph(interactive_note, styles["band"])]],
             colWidths=[176 * mm],
             style=TableStyle(
                 [

@@ -27,6 +27,7 @@
 # local package store / generated artefacts
 /.pnpm-store/
 /output/
+/.venv/
 
 # debug
 npm-debug.log*

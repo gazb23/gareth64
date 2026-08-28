@@ -127,6 +127,13 @@ function quickViewAnchor(canonicalUrl: string): string {
 
 const normaliseQuestion = (question: string) => question.trim().toLowerCase();
 
+/** Evidence anchor → the tape that tells the fuller story. */
+const TAPE_SUGGESTIONS = [
+  { anchor: "iris", label: "> LOAD THE IRIS TAPE FOR THE FULL STORY", run: 'LOAD "IRIS",1' },
+  { anchor: "products", label: "> LOAD THE PRODUCTS TAPE TO SEE THEM RUN", run: 'LOAD "PRODUCTS",1' },
+  { anchor: "contact", label: "> LOAD THE CONTACT TAPE", run: 'LOAD "CONTACT",1' },
+] as const;
+
 function CassetteFace({ item, spinning = false }: { readonly item: Tape; readonly spinning?: boolean }) {
   return (
     <span
@@ -202,7 +209,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
       },
       onSources: (event) => {
         result.sources = event;
-        setSearching("EVIDENCE FOUND — WRITING ANSWER");
+        setSearching("EVIDENCE FOUND. WRITING ANSWER");
       },
       onError: (message, fallback) => { result.failure = { message, fallback }; },
     });
@@ -212,20 +219,24 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
     if (result.failure) out.push(text(result.failure.message, "error"), text(result.failure.fallback, "dim"));
     // The model went quiet without erroring: answer from the retrieved evidence instead.
     if (!result.failure && !result.sawText && result.sources && result.sources.sources.length > 0) {
-      out.push(text("AI CHANNEL SILENT — READING FROM THE LOCAL DISK:", "dim"));
-      for (const source of result.sources.sources.slice(0, 2)) out.push(text(source.text));
+      out.push(text("AI CHANNEL SILENT. READING FROM THE LOCAL DISK:", "dim"));
+      for (const source of result.sources.sources.slice(0, 2)) out.push(text(source.text, "bright"));
     }
     if (result.sources && result.sources.sources.length > 0) {
-      out.push(gap(), text("SOURCES — CLICK TO READ MORE:", "system"));
+      out.push(gap(), text("SOURCES:", "system"));
       result.sources.sources.forEach((source, index) => {
         out.push(evidence(`[${index + 1}] ${source.title.toUpperCase()}`, quickViewAnchor(source.canonicalUrl)));
       });
     }
+    // When the evidence points at a tape, invite the deep dive.
+    const anchors = (result.sources?.sources ?? []).map((source) => quickViewAnchor(source.canonicalUrl));
+    const suggestedTape = TAPE_SUGGESTIONS.find(({ anchor }) => anchors.includes(anchor));
     const remaining = siteContent.starterQuestions
       .filter((candidate) => !askedRef.current.has(normaliseQuestion(candidate)))
       .slice(0, 3);
-    if (remaining.length > 0) {
+    if (suggestedTape || remaining.length > 0) {
       out.push(gap(), text("STILL ON THE TAPE:", "dim"));
+      if (suggestedTape) out.push(command(suggestedTape.label, suggestedTape.run));
       for (const candidate of remaining) out.push(command(`? ${candidate.toUpperCase()}`, `ASK "${candidate}"`));
     }
     out.push(gap(), text("READY."));
@@ -413,7 +424,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
         termRef.current.printNow([
           ...tapeMenuLines(),
           gap(),
-          text("TYPE HELP FOR COMMANDS — OR PRESS F1 FOR THE TAPE DIRECTORY.", "dim"),
+          text("TYPE HELP FOR COMMANDS. F1 SHOWS THE TAPE DIRECTORY.", "dim"),
           gap(),
           text("READY."),
         ]);
@@ -745,62 +756,10 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
           </div>
           </div>
 
-          <aside className={styles.gear}>
-              <div className={styles.deck} aria-label="Datasette">
-                <div className={styles.deckTop}>
-                  <span className={styles.deckBrand}>1530 DATASETTE</span>
-                  <span className={`${styles.deckSave} ${loading ? styles.deckSaveOn : ""}`} aria-hidden="true" />
-                </div>
-                <div className={styles.deckWell}>
-                  {inserted ? (
-                    <CassetteFace item={inserted} spinning={loading} />
-                  ) : (
-                    <span className={styles.deckEmpty}>INSERT TAPE</span>
-                  )}
-                </div>
-                <div className={styles.deckRow}>
-                  <span className={styles.deckCounter} aria-hidden="true">{counter}</span>
-                  <button
-                    type="button"
-                    className={styles.deckPlay}
-                    onClick={() => typeCommand("RUN")}
-                    disabled={!(visibleState.kind === "ready" && visibleState.selectedTape)}
-                  >
-                    PLAY
-                  </button>
-                  <button type="button" onClick={() => typeCommand("EJECT")} disabled={!tape || !canLoad}>
-                    EJECT
-                  </button>
-                </div>
-                <p className={styles.deckStatus}>{loading ? `LOADING… ${counter}` : deckLabel}</p>
-              </div>
-
-          <div
-            className={`${styles.tapeShelf} ${screenOn && !everLoaded ? styles.shelfInvite : ""}`}
-            aria-label="Career tape library"
-          >
-            <p>CAREER TAPES</p>
-            {screenOn && !everLoaded && <p className={styles.shelfHint}>CLICK A TAPE TO LOAD IT</p>}
-            {tapes.map((item) => (
-              <button
-                type="button"
-                key={item.id}
-                className={`${styles.cassette} ${tape === item.id ? styles.tapeInserted : ""}`}
-                style={{ "--tape-colour": item.colour, "--tape-ink": item.ink } as CSSProperties}
-                onClick={() => typeCommand(`LOAD "${item.label}",1`)}
-                disabled={!canLoad}
-                aria-pressed={tape === item.id}
-                aria-label={`Load tape ${item.label}`}
-              >
-                <CassetteFace item={item} spinning={loading && tape === item.id} />
-              </button>
-            ))}
-          </div>
-          </aside>
         </div>
 
         <footer className={styles.hints}>
-          <span>TYPE HELP</span><span>F1 — DIR</span><span>F5 — RUN</span><span>ESC — BREAK</span>
+          <span>TYPE HELP</span><span>F1 = DIR</span><span>F5 = RUN</span><span>ESC = BREAK</span>
           {(visibleState.kind === "program" || visibleState.kind === "streaming") && (
             <button type="button" onClick={() => typeCommand("EJECT")}>EJECT TAPE</button>
           )}

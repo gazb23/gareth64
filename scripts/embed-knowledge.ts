@@ -16,7 +16,7 @@ async function main() {
   const openrouter = createOpenRouter({
     apiKey,
     appName: "Gareth64 knowledge build",
-    appUrl: "https://gareth64.vercel.app",
+    appUrl: "https://garethbeall.com",
     compatibility: "strict",
   });
 

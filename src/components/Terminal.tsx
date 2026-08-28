@@ -125,7 +125,7 @@ export function Terminal({
         value={input}
         onChange={(event) => onInputChange(event.target.value)}
         onKeyDown={handleKeyDown}
-        aria-label="Gareth64 terminal — type a command such as HELP or DIR"
+        aria-label="Gareth64 terminal. Type a command such as HELP or DIR"
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="characters"
