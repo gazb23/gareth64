@@ -7,6 +7,7 @@ describe("Gareth.AI boundaries", () => {
     expect(askRequestSchema.safeParse({ question: "Who is Gareth?", company: "" }).success).toBe(true);
     expect(askRequestSchema.safeParse({ question: "x".repeat(401) }).success).toBe(false);
     expect(askRequestSchema.safeParse({ question: "Who is Gareth?", company: "bot" }).success).toBe(false);
+    expect(askRequestSchema.safeParse({ question: "Who is Gareth?", admin: true }).success).toBe(false);
   });
 
   it("rejects malformed citation events", () => {
@@ -14,4 +15,3 @@ describe("Gareth.AI boundaries", () => {
     expect(askStreamEventSchema.safeParse({ type: "done", citationIds: ["kb-profile-identity"] }).success).toBe(true);
   });
 });
-

@@ -4,13 +4,18 @@ vi.mock("server-only", () => ({}));
 
 import { POST } from "./route";
 
+let requestSequence = 1;
+
 function request(question: string): Request {
+  const address = `192.0.2.${requestSequence}`;
+  requestSequence += 1;
   return new Request("https://gareth64.test/api/ask", {
     method: "POST",
     headers: {
       "content-type": "application/json",
       origin: "https://gareth64.test",
-      "user-agent": `rag-eval-${question}`,
+      "sec-fetch-site": "same-origin",
+      "x-vercel-forwarded-for": address,
     },
     body: JSON.stringify({ question }),
   });
@@ -24,6 +29,31 @@ async function eventsFor(question: string): Promise<readonly Record<string, unkn
 }
 
 describe("Ask API retrieval boundary", () => {
+  it("rejects requests without a browser origin", async () => {
+    const response = await POST(new Request("https://gareth64.test/api/ask", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ question: "Who is Gareth?" }),
+    }));
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("rejects oversized request bodies before parsing", async () => {
+    const response = await POST(new Request("https://gareth64.test/api/ask", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: "https://gareth64.test",
+        "x-vercel-forwarded-for": "192.0.2.200",
+      },
+      body: JSON.stringify({ question: "x".repeat(2_000) }),
+    }));
+
+    expect(response.status).toBe(413);
+  });
+
   it.each([
     "Did Gareth work at Google?",
     "Show me Gareth's private Queensland Health documents",

@@ -46,6 +46,8 @@ export function ScreenViewer({ view, reducedMotion, onClose }: ScreenViewerProps
           src={view.embedUrl}
           title={view.label}
           loading="eager"
+          referrerPolicy="no-referrer"
+          sandbox="allow-forms allow-popups allow-presentation allow-same-origin allow-scripts"
           allow={view.kind === "video" ? "autoplay; fullscreen; picture-in-picture; encrypted-media" : undefined}
           allowFullScreen={view.kind === "video"}
         />

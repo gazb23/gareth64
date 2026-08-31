@@ -3,7 +3,7 @@ import { z } from "zod";
 export const askRequestSchema = z.object({
   question: z.string().trim().min(2).max(400),
   company: z.string().max(0).optional(),
-});
+}).strict();
 
 export type AskRequest = z.infer<typeof askRequestSchema>;
 
@@ -27,4 +27,3 @@ export const askStreamEventSchema = z.discriminatedUnion("type", [
 ]);
 
 export type AskStreamEvent = z.infer<typeof askStreamEventSchema>;
-

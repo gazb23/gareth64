@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import { streamText } from "ai";
 
 import { siteContent } from "@/content/site";
@@ -8,12 +6,21 @@ import { assessRetrieval } from "@/lib/retrieval-local";
 import { retrieveHybrid, retrieveLexically, type RetrievalResult } from "@/lib/retrieval";
 import { getServerConfig } from "@/server/config";
 import { getOpenRouter } from "@/server/openrouter";
-import { checkRateLimit } from "@/server/rate-limit";
+import { checkRateLimit, requestRateLimitKey } from "@/server/rate-limit";
+import { isJsonRequest, isSameOriginBrowserRequest, readJsonBody } from "@/server/request-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 20;
 
 const encoder = new TextEncoder();
+const maxRequestBytes = 1_024;
+const responseSecurityHeaders = {
+  "Cache-Control": "no-store",
+  "Cross-Origin-Resource-Policy": "same-origin",
+  "Referrer-Policy": "no-referrer",
+  "X-Content-Type-Options": "nosniff",
+} as const;
 
 function encode(event: AskStreamEvent): Uint8Array {
   return encoder.encode(`${JSON.stringify(event)}\n`);
@@ -28,15 +35,11 @@ function sourceCards(results: readonly RetrievalResult[]) {
   }));
 }
 
-function requestKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  const agent = request.headers.get("user-agent") ?? "unknown";
-  return createHash("sha256").update(`${forwarded}|${agent}`).digest("hex").slice(0, 24);
-}
-
-function isSameOrigin(request: Request): boolean {
-  const origin = request.headers.get("origin");
-  return !origin || origin === new URL(request.url).origin;
+function errorResponse(error: string, status: number, headers?: Readonly<Record<string, string>>): Response {
+  return Response.json({ error }, {
+    status,
+    headers: { ...responseSecurityHeaders, ...headers },
+  });
 }
 
 function fallbackAnswer(results: readonly RetrievalResult[]): string {
@@ -47,31 +50,41 @@ function fallbackAnswer(results: readonly RetrievalResult[]): string {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (!isSameOrigin(request)) return Response.json({ error: "Cross-origin request rejected." }, { status: 403 });
-  if (!request.headers.get("content-type")?.includes("application/json")) {
-    return Response.json({ error: "Expected application/json." }, { status: 415 });
-  }
+  if (!isSameOriginBrowserRequest(request)) return errorResponse("Browser origin rejected.", 403);
+  if (!isJsonRequest(request)) return errorResponse("Expected application/json.", 415);
 
-  const limit = checkRateLimit(requestKey(request));
+  const limit = checkRateLimit(requestRateLimitKey(request));
   if (!limit.allowed) {
-    return Response.json(
-      { error: "TOO MANY QUESTIONS IN THE BUFFER. TRY AGAIN SHORTLY." },
-      { status: 429, headers: { "Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1_000)) } },
+    return errorResponse(
+      "TOO MANY QUESTIONS IN THE BUFFER. TRY AGAIN SHORTLY.",
+      429,
+      { "Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1_000)) },
     );
   }
 
-  const parsed = askRequestSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return Response.json({ error: "Question did not pass input checks." }, { status: 400 });
+  const body = await readJsonBody(request, maxRequestBytes);
+  if (body.kind === "too-large") return errorResponse("Request body is too large.", 413);
+  if (body.kind === "invalid") return errorResponse("Request body is not valid JSON.", 400);
+
+  const parsed = askRequestSchema.safeParse(body.value);
+  if (!parsed.success) return errorResponse("Question did not pass input checks.", 400);
 
   const { question } = parsed.data;
-  const hybrid = await retrieveHybrid(question, 6);
+  const lexical = retrieveLexically(question, 6);
+  const lexicalAssessment = assessRetrieval(question, lexical);
+  const skipExternalRetrieval = lexicalAssessment.kind === "unsupported"
+    && lexicalAssessment.reason !== "insufficient-evidence";
+  const hybrid = skipExternalRetrieval ? [] : await retrieveHybrid(question, 6);
   // Lexically-strongest evidence goes first: hybrid semantic ranking can float
   // fuzzy matches above the chunk that directly answers the question.
-  const merged = [...retrieveLexically(question, 3), ...hybrid]
+  const merged = [...lexical.slice(0, 3), ...hybrid]
     .filter((result, index, all) => all.findIndex((other) => other.chunk.id === result.chunk.id) === index)
     .slice(0, 6);
-  const fallbackRetrieval = merged.length > 0 ? merged : retrieveLexically(question, 6);
-  const unsupported = assessRetrieval(question, fallbackRetrieval).kind === "unsupported";
+  const fallbackRetrieval = merged.length > 0 ? merged : lexical;
+  const assessment = skipExternalRetrieval
+    ? lexicalAssessment
+    : assessRetrieval(question, fallbackRetrieval);
+  const unsupported = assessment.kind === "unsupported";
   const sources = sourceCards(unsupported ? fallbackRetrieval.slice(0, 2) : fallbackRetrieval);
   const followUps = unsupported
     ? ["What did Gareth build with IRIS?", "What makes him different?"]
@@ -134,10 +147,11 @@ export async function POST(request: Request): Promise<Response> {
 
   return new Response(stream, {
     headers: {
+      ...responseSecurityHeaders,
       "Content-Type": "application/x-ndjson; charset=utf-8",
-      "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff",
+      "X-RateLimit-Limit": "12",
       "X-RateLimit-Remaining": String(limit.remaining),
+      "X-RateLimit-Reset": String(Math.ceil(limit.resetAt / 1_000)),
     },
   });
 }
