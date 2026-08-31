@@ -420,6 +420,8 @@
 
 .termLine,
 .echoLine { margin: 0; min-height: 1.5em; }
+.streamAnchor { display: block; height: 0; }
+.printAnchor { display: block; height: 0; }
 .echoLine { color: color-mix(in srgb, var(--c64-text), white 14%); }
 .tone_dim { opacity: .75; }
 .tone_bright { color: #e9e7f8; }

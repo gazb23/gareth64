@@ -65,6 +65,8 @@ export function useTerminal({ reducedMotion }: { readonly reducedMotion: boolean
   const [input, setInput] = useState("");
   const historyRef = useRef<string[]>([]);
   const historyIndexRef = useRef<number>(-1);
+  const nextScrollTargetIdRef = useRef(1);
+  const [scrollTargetId, setScrollTargetId] = useState<number | null>(null);
   // Mirrors streamText so endStream can commit synchronously, in order, exactly once.
   const streamRef = useRef<string | null>(null);
 
@@ -78,21 +80,36 @@ export function useTerminal({ reducedMotion }: { readonly reducedMotion: boolean
   }, [engineActive, reducedMotion]);
 
   const print = useCallback((lines: TermLine[]) => {
+    setScrollTargetId(null);
     dispatchBuffer({ type: "enqueue", lines });
   }, []);
 
+  const printFromStart = useCallback((lines: TermLine[]) => {
+    const id = nextScrollTargetIdRef.current;
+    nextScrollTargetIdRef.current += 1;
+    setScrollTargetId(id);
+    dispatchBuffer({ type: "enqueue", lines: [{ kind: "scroll-anchor", id }, ...lines] });
+  }, []);
+
   const printNow = useCallback((lines: TermLine[]) => {
+    setScrollTargetId(null);
     dispatchBuffer({ type: "commit", lines });
   }, []);
 
   const clear = useCallback(() => {
     dispatchBuffer({ type: "clear" });
+    setScrollTargetId(null);
     streamRef.current = null;
     setStreamText(null);
   }, []);
 
   const flush = useCallback(() => {
+    setScrollTargetId(null);
     dispatchBuffer({ type: "flush" });
+  }, []);
+
+  const acknowledgeScrollTarget = useCallback((id: number) => {
+    setScrollTargetId((current) => current === id ? null : current);
   }, []);
 
   const commitEcho = useCallback((value: string) => {
@@ -164,13 +181,17 @@ export function useTerminal({ reducedMotion }: { readonly reducedMotion: boolean
     commitEcho,
     historyMove,
     print,
+    printFromStart,
     printNow,
     clear,
     flush,
     beginStream,
     appendStream,
     endStream,
+    printing: engineActive,
     streaming: streamText !== null,
+    scrollTargetId,
+    acknowledgeScrollTarget,
     busy: engineActive || streamText !== null,
   };
 }

@@ -5,6 +5,28 @@ import { command, gap, link, map, text, type TermLine } from "./terminal";
 
 const pad = (value: string, width: number) => value.padEnd(width, " ");
 
+const NEXT_TAPE_ACTIONS = [
+  { tape: "gareth", label: "> ASK GARETH.AI", command: 'LOAD "GARETH.AI",1' },
+  { tape: "iris", label: "> EXPLORE IRIS", command: 'LOAD "IRIS",1' },
+  { tape: "products", label: "> SEE THE PRODUCTS", command: 'LOAD "PRODUCTS",1' },
+  { tape: "contact", label: "> CONTACT GARETH", command: 'LOAD "CONTACT",1' },
+] satisfies readonly { readonly tape: TapeId; readonly label: string; readonly command: string }[];
+
+function nextStepLines(currentTape: TapeId): TermLine[] {
+  const nextTapes = NEXT_TAPE_ACTIONS.filter(({ tape }) => tape !== currentTape).slice(0, 2);
+  return [
+    text("WHAT NEXT?", "system"),
+    ...nextTapes.map((next) => command(next.label, next.command)),
+    command("> VIEW RÉSUMÉ", "RESUME"),
+  ];
+}
+
+export function starterQuestionCommand(question: string): string {
+  return question === "What products has he shipped?"
+    ? 'LOAD "PRODUCTS",1'
+    : `ASK "${question}"`;
+}
+
 export function directoryLines(): TermLine[] {
   const rows = tapes.map((tape) =>
     text(`${pad(tape.number, 4)}"${pad(tape.label, 14)}" PRG${"fictional" in tape && tape.fictional ? "   C64 GAME" : ""}`),
@@ -99,7 +121,9 @@ export function programLines(tape: TapeId): TermLine[] {
       gap(),
       text("GARETH.AI IS LISTENING.", "system"),
       text('TYPE ASK "YOUR QUESTION" OR CLICK ONE:', "dim"),
-      ...siteContent.starterQuestions.map((q) => command(`? ${q.toUpperCase()}`, `ASK "${q}"`)),
+      ...siteContent.starterQuestions.map((q) => command(`? ${q.toUpperCase()}`, starterQuestionCommand(q))),
+      gap(),
+      ...nextStepLines(tape),
     ];
   }
 
@@ -115,6 +139,8 @@ export function programLines(tape: TapeId): TermLine[] {
       gap(),
       command('> WATCH THE 2-MINUTE PILOT DEMO ON THIS SCREEN', 'VIEW "IRIS DEMO"'),
       text(siteContent.iris.video.note.toUpperCase(), "dim"),
+      gap(),
+      ...nextStepLines(tape),
     ];
   }
 
@@ -129,6 +155,7 @@ export function programLines(tape: TapeId): TermLine[] {
         text(product.description, "dim"),
         gap(),
       ]),
+      ...nextStepLines(tape),
     ];
   }
 
@@ -141,6 +168,8 @@ export function programLines(tape: TapeId): TermLine[] {
       link("GITHUB: GAZB23", siteContent.links.github),
       command("FAST RESUME VIEW", "RESUME"),
       link("DOWNLOAD PDF RESUME", `/${siteContent.resume.fileName}`),
+      gap(),
+      ...nextStepLines(tape),
     ];
   }
 

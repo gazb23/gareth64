@@ -9,8 +9,8 @@ import type { ViewTarget } from "@/content/views";
 import { askGareth, type AskSources } from "@/lib/ask-client";
 import { runCommand, type BasicEffect } from "@/lib/basic";
 import { transition, type MachineState } from "@/lib/machine";
-import { programLines, tapeMenuLines } from "@/lib/programs";
-import { C64_PALETTE, command, echo, evidence, gap, text, type TermLine } from "@/lib/terminal";
+import { programLines, starterQuestionCommand, tapeMenuLines } from "@/lib/programs";
+import { C64_PALETTE, command, evidence, gap, text, type TermLine } from "@/lib/terminal";
 import { useTerminal } from "@/lib/use-terminal";
 
 import { C64Keyboard, FUNCTION_KEYS, KEYBOARD_ROWS, SPACE_KEY, type KeyDef } from "./C64Keyboard";
@@ -186,6 +186,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
   const audioRef = useRef(audio);
 
   const focusInput = useCallback(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return;
     inputRef.current?.focus({ preventScroll: true });
   }, []);
 
@@ -234,11 +235,13 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
     const remaining = siteContent.starterQuestions
       .filter((candidate) => !askedRef.current.has(normaliseQuestion(candidate)))
       .slice(0, 3);
-    if (suggestedTape || remaining.length > 0) {
-      out.push(gap(), text("STILL ON THE TAPE:", "dim"));
-      if (suggestedTape) out.push(command(suggestedTape.label, suggestedTape.run));
-      for (const candidate of remaining) out.push(command(`? ${candidate.toUpperCase()}`, `ASK "${candidate}"`));
+    out.push(gap(), text("WHAT NEXT?", "system"));
+    for (const candidate of remaining.slice(0, 2)) {
+      out.push(command(`? ${candidate.toUpperCase()}`, starterQuestionCommand(candidate)));
     }
+    const nextTape = suggestedTape ?? TAPE_SUGGESTIONS[0];
+    out.push(command(nextTape.label, nextTape.run));
+    out.push(command("> VIEW RÉSUMÉ", "RESUME"));
     out.push(gap(), text("READY."));
     term.printNow(out);
     if (visibleRef.current.kind === "streaming") dispatch({ type: "ANSWER_COMPLETE" });
@@ -484,8 +487,8 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
   // Program start (from a fresh load only): READY. RUN, then the listing.
   useEffect(() => {
     if (state.kind !== "program" || prevKindRef.current !== "loading") return;
-    termRef.current.printNow([text("READY."), echo("RUN")]);
-    termRef.current.print(programLines(state.tape));
+    termRef.current.clear();
+    termRef.current.printFromStart(programLines(state.tape));
   }, [state]);
 
   // Tracks the previous machine kind so the effects above can tell arrivals apart.
@@ -608,6 +611,9 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
                                 input={term.input}
                                 showInput={canTypeNow}
                                 busy={term.busy}
+                                printing={term.printing}
+                                streaming={term.streaming}
+                                scrollTargetId={term.scrollTargetId}
                                 searching={searching}
                                 inputRef={inputRef}
                                 onInputChange={term.setInput}
@@ -616,6 +622,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
                                 onCommandClick={(command) => typeCommand(command)}
                                 onEvidenceClick={openEvidence}
                                 onFocusRequest={focusInput}
+                                onScrollTargetHandled={term.acknowledgeScrollTarget}
                               />
                             )
                           ) : (

@@ -1,7 +1,7 @@
 "use client";
 
-import type { KeyboardEvent as ReactKeyboardEvent, RefObject } from "react";
-import { useEffect, useRef } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, RefObject } from "react";
+import { Fragment, useLayoutEffect, useRef } from "react";
 
 import type { TermLine } from "@/lib/terminal";
 
@@ -13,6 +13,9 @@ interface TerminalProps {
   readonly input: string;
   readonly showInput: boolean;
   readonly busy: boolean;
+  readonly printing: boolean;
+  readonly streaming: boolean;
+  readonly scrollTargetId: number | null;
   readonly searching: string | null;
   readonly inputRef: RefObject<HTMLInputElement | null>;
   readonly onInputChange: (value: string) => void;
@@ -21,10 +24,13 @@ interface TerminalProps {
   readonly onCommandClick: (command: string) => void;
   readonly onEvidenceClick: (anchor: string) => void;
   readonly onFocusRequest: () => void;
+  readonly onScrollTargetHandled: (id: number) => void;
 }
 
+type VisibleTermLine = Exclude<TermLine, { readonly kind: "scroll-anchor" }>;
+
 function Line({ line, onCommandClick, onEvidenceClick }: {
-  readonly line: TermLine;
+  readonly line: VisibleTermLine;
   readonly onCommandClick: (command: string) => void;
   readonly onEvidenceClick: (anchor: string) => void;
 }) {
@@ -68,6 +74,9 @@ export function Terminal({
   input,
   showInput,
   busy,
+  printing,
+  streaming,
+  scrollTargetId,
   searching,
   inputRef,
   onInputChange,
@@ -76,13 +85,56 @@ export function Terminal({
   onCommandClick,
   onEvidenceClick,
   onFocusRequest,
+  onScrollTargetHandled,
 }: TerminalProps) {
   const logRef = useRef<HTMLDivElement>(null);
+  const streamAnchorRef = useRef<HTMLSpanElement>(null);
+  const printAnchorRef = useRef<HTMLSpanElement>(null);
+  const streamStartRef = useRef<number | null>(null);
+  const wasStreamingRef = useRef(false);
+  const lineBeforeStream = lines[lines.length - 2];
+  const streamAnchorIndex = lineBeforeStream?.kind === "echo" ? lines.length - 2 : lines.length - 1;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const log = logRef.current;
-    if (log) log.scrollTop = log.scrollHeight;
-  }, [lines, input, searching]);
+    if (!log) return;
+
+    if (streaming) {
+      const anchor = streamAnchorRef.current;
+      if (anchor) {
+        const logTop = log.getBoundingClientRect().top;
+        const anchorTop = anchor.getBoundingClientRect().top;
+        const paddingTop = Number.parseFloat(window.getComputedStyle(log).paddingTop);
+        streamStartRef.current = log.scrollTop + anchorTop - logTop - paddingTop;
+      }
+      log.scrollTop = log.scrollHeight;
+    } else if (wasStreamingRef.current && streamStartRef.current !== null) {
+      log.scrollTop = Math.max(0, streamStartRef.current);
+      streamStartRef.current = null;
+    } else {
+      log.scrollTop = log.scrollHeight;
+    }
+
+    wasStreamingRef.current = streaming;
+  }, [lines, input, searching, streaming]);
+
+  useLayoutEffect(() => {
+    if (printing || scrollTargetId === null) return;
+    const log = logRef.current;
+    const anchor = printAnchorRef.current;
+    if (!log || !anchor) return;
+    const logTop = log.getBoundingClientRect().top;
+    const anchorTop = anchor.getBoundingClientRect().top;
+    const paddingTop = Number.parseFloat(window.getComputedStyle(log).paddingTop);
+    log.scrollTop = Math.max(0, log.scrollTop + anchorTop - logTop - paddingTop);
+    onScrollTargetHandled(scrollTargetId);
+  }, [printing, scrollTargetId, onScrollTargetHandled]);
+
+  function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.pointerType === "touch") return;
+    if (event.target instanceof Element && event.target.closest("a, button")) return;
+    onFocusRequest();
+  }
 
   function handleKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
@@ -100,10 +152,24 @@ export function Terminal({
   }
 
   return (
-    <div className={styles.paper} onClick={onFocusRequest} role="presentation">
+    <div className={styles.paper} onPointerUp={handlePointerUp} role="presentation">
       <div className={styles.log} ref={logRef} role="log" aria-live="polite" aria-label="Gareth64 terminal output">
         {lines.map((line, index) => (
-          <Line line={line} onCommandClick={onCommandClick} onEvidenceClick={onEvidenceClick} key={index} />
+          <Fragment key={index}>
+            {streaming && index === streamAnchorIndex ? (
+              <span ref={streamAnchorRef} className={styles.streamAnchor} data-stream-anchor aria-hidden="true" />
+            ) : null}
+            {line.kind === "scroll-anchor" ? (
+              <span
+                ref={line.id === scrollTargetId ? printAnchorRef : undefined}
+                className={styles.printAnchor}
+                data-print-anchor={line.id}
+                aria-hidden="true"
+              />
+            ) : (
+              <Line line={line} onCommandClick={onCommandClick} onEvidenceClick={onEvidenceClick} />
+            )}
+          </Fragment>
         ))}
         {searching && (
           <p className={styles.searchStatus}>
@@ -132,6 +198,7 @@ export function Terminal({
         spellCheck={false}
         maxLength={400}
         enterKeyHint="send"
+        inputMode="none"
       />
     </div>
   );

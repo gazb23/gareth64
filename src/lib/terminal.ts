@@ -6,6 +6,7 @@ export type TermLine =
   | { readonly kind: "command"; readonly text: string; readonly command: string }
   | { readonly kind: "evidence"; readonly text: string; readonly anchor: string; readonly hint?: string }
   | { readonly kind: "echo"; readonly text: string }
+  | { readonly kind: "scroll-anchor"; readonly id: number }
   | { readonly kind: "map" }
   | { readonly kind: "gap" };
 
