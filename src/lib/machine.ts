@@ -37,7 +37,10 @@ export function transition(state: MachineState, event: MachineEvent): MachineSta
   }
 
   if (state.kind === "quick-view") {
-    return event.type === "CLOSE_QUICK_VIEW" ? state.returnTo : state;
+    if (event.type === "CLOSE_QUICK_VIEW") return state.returnTo;
+    if (event.type === "OPEN_QUICK_VIEW") return state;
+    const next = transition(state.returnTo, event);
+    return next.kind === "quick-view" ? next : { kind: "quick-view", returnTo: next };
   }
 
   switch (state.kind) {
@@ -51,6 +54,7 @@ export function transition(state: MachineState, event: MachineEvent): MachineSta
         : state;
     case "ready":
       if (event.type === "POWER") return { kind: "off" };
+      if (event.type === "ASK") return { kind: "streaming", tape: "gareth" };
       if (event.type === "SELECT_TAPE") return { ...state, selectedTape: event.tape };
       if (event.type === "EJECT" && state.selectedTape) return { kind: "ready", selectedTape: null };
       if (event.type === "LOAD_TAPE" && state.selectedTape) {
@@ -65,7 +69,7 @@ export function transition(state: MachineState, event: MachineEvent): MachineSta
     case "program":
       if (event.type === "POWER") return { kind: "off" };
       if (event.type === "EJECT") return { kind: "ready", selectedTape: null };
-      if (event.type === "ASK" && state.tape === "gareth") return { kind: "streaming", tape: "gareth" };
+      if (event.type === "ASK") return { kind: "streaming", tape: "gareth" };
       if (event.type === "FAIL") return { kind: "error", message: event.message, recoverTo: "program" };
       return state;
     case "streaming":
@@ -82,4 +86,3 @@ export function transition(state: MachineState, event: MachineEvent): MachineSta
       return assertNever(state);
   }
 }
-

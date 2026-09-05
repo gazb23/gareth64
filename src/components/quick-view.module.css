@@ -148,3 +148,121 @@
   .chapterList div { grid-template-columns: 1fr; }
   .productGrid a { min-height: 300px; }
 }
+
+/* Navigation and the complete professional record. */
+.view { color-scheme: light; }
+.navigation { display: flex; justify-content: space-between; gap: 1.5rem; padding: 1.5rem clamp(1.4rem, 6vw, 6rem); border-bottom: 1px solid #d2d2c8; font-size: .78rem; }
+.navigation > a { font-weight: 700; }
+.navigation > div { display: flex; flex-wrap: wrap; gap: 1.4rem; }
+.navigation a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.view a:focus-visible { outline-color: #335e4a; }
+.hero { min-height: auto; padding: 4.5rem clamp(1.4rem, 6vw, 6rem) 4rem; }
+.hero h1 { font-size: clamp(4rem, 10vw, 8rem); line-height: .94; }
+.headline { margin-bottom: 0; }
+.introduction { max-width: 780px; }
+.actions .primaryAction:hover, .actions .primaryAction:focus-visible { color: #fff; background: #335e4a; }
+.proofGrid { padding: 0 clamp(1.4rem, 6vw, 6rem); }
+.proof { min-height: auto; padding: 2rem; }
+.proof:first-child { padding-left: 0; }
+.proof > p:first-of-type { margin-top: 1.5rem; }
+.proof h2 { font-size: clamp(1.8rem, 2.7vw, 2.8rem); line-height: 1.05; }
+.proof > span { color: #5f675e; }
+.experience, .capabilities { padding: 4.5rem clamp(1.4rem, 6vw, 6rem); border-top: 1px solid #cccfc5; }
+.sectionHeading h2 { max-width: 750px; margin: .6rem 0 2.5rem; font: 500 clamp(2.5rem, 5vw, 4.5rem)/1.05 var(--font-editorial), Georgia, serif; letter-spacing: -.045em; }
+.job { display: grid; grid-template-columns: minmax(220px, .7fr) 1.3fr; gap: 3rem; padding: 2rem 0; border-top: 1px solid #cccfc5; }
+.period { margin: 0 0 1rem; color: #546053; font: .7rem/1.6 var(--font-geist-mono), monospace; }
+.job h3 { margin: 0; font-size: 1.25rem; letter-spacing: -.03em; }
+.organisation { margin: .6rem 0; line-height: 1.5; }
+.jobLocation { color: #5b645b; font-size: .75rem; }
+.job ul { margin: 0; padding-left: 1.15rem; color: #404943; font-size: .9rem; line-height: 1.75; }
+.job li + li { margin-top: .8rem; }
+.caseStudy { padding: 4.5rem clamp(1.4rem, 6vw, 6rem); gap: 4rem; }
+.caseStudy .sectionLabel, .closing .sectionLabel { color: #a6c9b3; }
+.caseStudy h2 { margin-bottom: 1.5rem; }
+.caseSummary { margin-top: 0; font-size: clamp(1.8rem, 3vw, 3rem); line-height: 1.2; }
+.chapterList { margin-top: 2rem; }
+.chapterList dd { margin: 0; }
+.demoLink { display: inline-block; margin-top: 1rem; padding-bottom: .35rem; border-bottom: 1px solid #9fc4af; color: #c5e2d2; font-size: .85rem; }
+.demoNote { max-width: 260px; font-size: .7rem; color: #b1bdb5; line-height: 1.7; }
+.pipeline { margin: 2.5rem 0 0; padding: 1.25rem; border: 1px solid #456051; border-radius: 4px; background: #1c2f25; }
+.pipeline figcaption { font: .65rem/1.5 var(--font-geist-mono), monospace; letter-spacing: .07em; color: #b4c7bc; text-transform: uppercase; }
+.pipeline ol { margin: 1.5rem 0 0; padding: 0; list-style: none; }
+.pipeline li { display: flex; gap: .9rem; align-items: center; position: relative; padding-bottom: 1.5rem; }
+.pipeline li > span { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border: 1px solid #799985; border-radius: 50%; font: .65rem var(--font-geist-mono), monospace; color: #c3d5c9; }
+.pipeline li:not(:last-child)::after { content: ""; position: absolute; width: 1px; height: 17px; background: #799985; left: 14px; bottom: 3px; }
+.pipeline strong { display: block; font-size: .76rem; font-weight: 500; }
+.pipeline small { display: block; margin-top: .35rem; color: #b3c2b8; font-size: .67rem; }
+.pipeline > p { margin: 0; padding-top: .8rem; border-top: 1px solid #456051; color: #e9c88c; font-size: .7rem; }
+.capabilities { background: #e7e9df; }
+.capabilities dl { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 3rem; }
+.capabilities dl > div { padding: 1.5rem 0; border-top: 1px solid #b9c3b6; }
+.capabilities dt { font-weight: 650; font-size: .95rem; }
+.capabilities dd { margin: .6rem 0 0; color: #404943; font-size: .9rem; line-height: 1.7; }
+.education { margin: 2rem 0 0; padding-top: 1.5rem; border-top: 1px solid #b9c3b6; font-size: .8rem; line-height: 1.7; }
+.products { padding: 4.5rem clamp(1.4rem, 6vw, 6rem); }
+.products > h2 { font-size: clamp(3rem, 5vw, 5rem); }
+.productGrid { margin-top: 2rem; gap: 1rem; background: transparent; border: 0; }
+.productGrid a { padding: 1.2rem; border: 1px solid #c7cbc0; border-radius: 4px; }
+.productGrid h3 { margin: 1rem 0 0; }
+.productGrid p { margin-bottom: 0; font-size: .9rem; }
+.productGrid strong { padding-top: 1.5rem; }
+.productArt { position: relative; display: grid; place-items: center; height: 150px; margin-bottom: 1.5rem; overflow: hidden; color: #366650; background: #dfe8df; border-radius: 2px; }
+.productArt > span { position: absolute; top: 1rem; left: 1rem; font-family: var(--font-geist-mono), monospace; color: inherit; }
+.productArt svg { height: 110px; width: 240px; stroke: currentColor; stroke-width: 1.5; transition: transform 180ms ease; }
+.productGrid a:hover svg { transform: translateY(-3px); }
+.productArt[data-project="INKY"] { color: #64548b; background: #e8e1ef; }
+.productArt[data-project="NAMELY"] { color: #805038; background: #f1e2d6; }
+.productArt[data-project="PHOTO"] { color: #445b74; background: #dfe6ec; }
+.closing { padding: 4.5rem clamp(1.4rem, 6vw, 6rem); }
+@media (max-width: 850px) {
+  .hero h1 { font-size: clamp(3.6rem, 13vw, 6rem); }
+  .proof, .proof:first-child { padding: 1.5rem 0; }
+  .proof > p:first-of-type { margin-top: 1rem; }
+  .proof h2 { max-width: 520px; }
+  .job { grid-template-columns: 1fr; gap: 1rem; }
+  .caseStudy { gap: 2.5rem; }
+  .pipeline { max-width: 400px; }
+  .capabilities dl { grid-template-columns: 1fr; }
+  .navigation { flex-direction: column; gap: 1rem; }
+  .navigation > div { gap: 1rem; }
+  .compact .hero { padding-top: 3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .view *, .view *::before, .view *::after { transition: none !important; }
+}
+@media print {
+  .view { background: white; color: #111; font-size: 9pt; }
+  .navigation, .actions, .productArt, .pipeline, .demoLink, .demoNote { display: none; }
+  .hero, .compact .hero, .experience, .capabilities, .caseStudy, .products, .closing { padding: 12pt 0; color: #111; background: white; }
+  .hero h1 { font-size: 36pt; }
+  .headline { margin: 8pt 0; font-size: 16pt; }
+  .introduction, .job ul, .capabilities dd, .productGrid p { font-size: 9pt; line-height: 1.5; }
+  .hero .kicker { margin-top: 0; }
+  .hero p { margin-block: 6pt; }
+  .proofGrid { padding: 0; }
+  .proof { padding: 10pt !important; min-height: 0; }
+  .proof > span { display: none; }
+  .proof h2 { font-size: 16pt; }
+  .proof p { margin-block: 5pt !important; font-size: 9pt; }
+  .sectionHeading h2, .products > h2, .closing h2 { margin: 6pt 0 12pt; font-size: 24pt; }
+  .job { display: block; padding: 12pt 0; }
+  .job h3 { font-size: 12pt; }
+  .job li + li { margin-top: 4pt; }
+  .jobLocation { display: none; }
+  .period, .organisation { margin: 4pt 0; }
+  .caseStudy { display: block; }
+  .caseStudy h2 { font-size: 28pt; margin-block: 8pt; }
+  .caseSummary { font-size: 14pt; }
+  .chapterList { margin: 10pt 0; }
+  .chapterList div { padding: 6pt 0; }
+  .chapterList dt, .chapterList dd, .caseLabel, .caseStudy .sectionLabel, .closing .sectionLabel { color: #333; }
+  .chapterList div, .capabilities dl > div, .productGrid a, .proof { break-inside: avoid; }
+  .capabilities dl { display: block; }
+  .capabilities dl > div { padding: 7pt 0; }
+  .productGrid { display: block; }
+  .productGrid a { min-height: 0; margin: 8pt 0; padding: 10pt; }
+  .productGrid h3 { margin-top: 5pt; font-size: 18pt; }
+  .productGrid strong { display: none; }
+  .closing > a { font-size: 12pt; }
+  .view h2, .view h3 { break-after: avoid; }
+}

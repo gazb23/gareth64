@@ -18,7 +18,7 @@ export async function askGareth(question: string, handlers: AskHandlers): Promis
     if (!response.ok || !response.body) {
       const payload = await response.json().catch(() => ({ error: "AI CHANNEL OFFLINE" }));
       const message = typeof payload.error === "string" ? payload.error : "AI CHANNEL OFFLINE";
-      handlers.onError(message, "THE LOCAL EVIDENCE INDEX IS STILL AVAILABLE — TRY A STARTER QUESTION.");
+      handlers.onError(message, "YOU CAN STILL READ THE RÉSUMÉ OR PICK A TAPE BELOW.");
       return;
     }
 
@@ -44,6 +44,6 @@ export async function askGareth(question: string, handlers: AskHandlers): Promis
       if (done) break;
     }
   } catch {
-    handlers.onError("AI CHANNEL OFFLINE — SEARCHING LOCAL DISK", "TRY ONE OF THE STARTER QUESTIONS — THE LOCAL EVIDENCE INDEX IS STILL AVAILABLE.");
+    handlers.onError("AI CHANNEL OFFLINE", "YOU CAN STILL READ THE RÉSUMÉ OR PICK A TAPE BELOW.");
   }
 }

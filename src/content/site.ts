@@ -3,9 +3,9 @@ export const siteContent = {
   shortName: "Gareth",
   headline: "Lead AI/ML Engineer",
   differentiator:
-    "Clinical pharmacist turned AI engineer. I ship RAG in healthcare, where safety and evals are non-negotiable and every pipeline stage has to survive scrutiny.",
+    "I build AI systems and software products. Most recently, I built IRIS, a clinical RAG system I'm taking into production for 5,000 Queensland Health clinicians. I've been coding since I was twelve and still can't leave an interesting problem alone. Away from work, I'm a husband, father, surfer and musician.",
   introduction:
-    "I build production AI systems for work where evidence matters. My advantage is that I understand both sides: fifteen years of clinical pharmacy, including intensive care, and six years of AI/ML engineering. I've been building software since I was twelve.",
+    "I lead IRIS engineering at Queensland Health, from document ingestion and retrieval through model serving, evaluation, and release. I also spent fifteen years as a clinical pharmacist, including intensive care.",
   location: "Sunshine Coast, Queensland, Australia",
   email: "gareth.beall@gmail.com",
   links: {
@@ -20,31 +20,31 @@ export const siteContent = {
   proofPoints: [
     {
       eyebrow: "Clinical AI",
-      title: "Built IRIS from idea to governed delivery",
-      text: "A clinical RAG system for Queensland Health. I took it from first prototype to governed release, and tuned every pipeline stage until clinicians could rely on it.",
+      title: "Built IRIS for 5,000 clinicians",
+      text: "I built the first prototype, brought it into Queensland Health, and now lead its production rollout.",
     },
     {
-      eyebrow: "Rare context",
-      title: "Fifteen years inside clinical practice",
-      text: "Clinical pharmacy experience, including intensive care, shapes how I reason about evidence, ambiguity, human factors, and the consequences of confident errors.",
+      eyebrow: "Clinical background",
+      title: "Fifteen years as a clinical pharmacist",
+      text: "My experience includes intensive care. It helps me spot answers that look plausible but are unsupported, wrong for the patient, or unsafe.",
     },
     {
-      eyebrow: "Product instinct",
-      title: "Ships tools, not demonstrations",
-      text: "Built and ran clinical calculators, consumer apps, photo restoration, and small AI experiments. All of them shipped to real users.",
+      eyebrow: "Product work",
+      title: "Built a clinical app used by 50,000 health professionals",
+      text: "I built and run Opioid Conversion Calculator. I also built Namely and My Restored Photo.",
     },
   ],
   iris: {
     name: "IRIS",
     label: "Clinical AI assistant for Queensland Health",
     summary:
-      "IRIS is an AI assistant Gareth conceived and built for clinicians at Queensland Health. Staff ask a question in plain language and IRIS answers from the health service's own approved documents. Every answer shows its exact sources, and when the evidence isn't there, IRIS says so.",
+      "IRIS answers clinicians' questions from Queensland Health's approved documents. I conceived and built it. I now lead its production rollout. Each answer shows its sources. If the evidence is not there, IRIS says so.",
     chapters: [
       ["What it does", "Answers clinical questions from approved local documents, with the supporting passages shown beside every answer."],
       ["How it works", "IRIS checks every document it ingests, searches by exact keywords and by meaning, and re-ranks the best passages before it writes an answer."],
-      ["Runs in-house", "The AI models run on the hospital's own GPU servers, so sensitive data never leaves the network."],
-      ["Built to be safe", "Tested against realistic clinical questions, including ones it should refuse. An honest \"I don't know\" beats confident guessing."],
-      ["Delivered for real", "Security review, user acceptance testing with clinicians, controlled releases, monitoring, and ongoing operations."],
+      ["Runs in-house", "IRIS runs on Queensland Health's own GPU servers. Sensitive data stays on the network."],
+      ["Built to be safe", "I test IRIS against realistic clinical questions, including questions it should refuse. An honest \"I don't know\" beats a confident guess."],
+      ["Rollout", "The rollout covers security review, clinician user acceptance testing, controlled releases, monitoring, and support."],
     ] as const,
     video: {
       page: "https://vimeo.com/1093612016",
@@ -57,7 +57,7 @@ export const siteContent = {
       name: "Opioid Conversion Calculator",
       role: "Clinical product",
       description:
-        "A medication-safety tool that puts specialist opioid-conversion knowledge into a focused, dependable interface for health professionals.",
+        "A medication-safety app that helps health professionals calculate opioid conversions using specialist clinical content.",
       href: "https://www.opioidconversioncalculator.com",
       viewId: "OPIOID",
       embeddable: true,
@@ -66,7 +66,7 @@ export const siteContent = {
       name: "Inky Health",
       role: "Health AI venture",
       description:
-        "Private, self-hosted document AI for health and government: search, structured extraction, and redaction for organisations whose data cannot leave their own network.",
+        "Private, self-hosted document AI for health and government organisations whose data cannot leave their network. It covers search, structured extraction, and redaction.",
       href: "https://inkyhealth.com",
       viewId: "INKY",
       embeddable: true,
@@ -84,7 +84,7 @@ export const siteContent = {
       name: "My Restored Photo",
       role: "AI product",
       description:
-        "AI photo restoration. Send a damaged photograph that matters to you, get it back repaired.",
+        "Restores damaged photographs with AI. Uploads stay private and are deleted on schedule.",
       href: "https://www.myrestoredphoto.com",
       viewId: "PHOTO",
       embeddable: false,
@@ -93,12 +93,12 @@ export const siteContent = {
   resume: {
     fileName: "Gareth_Beall_Lead_AI_ML_Engineer_Resume.pdf",
     profile:
-      "Lead AI/ML engineer with six years of hands-on AI and machine-learning engineering, and fifteen years of clinical pharmacy practice, including intensive care. Many people have built RAG applications; very few have shipped one in a healthcare environment, where safety and evaluation are critical and every part of the pipeline has to be scrutinised, picked apart, and tuned to state of the art. That is exactly what I did with IRIS at Queensland Health.",
+      "I have six years' experience in AI and ML engineering and fifteen years as a clinical pharmacist, including intensive care. I conceived and built IRIS and now lead its production rollout at Queensland Health. My work covers clinical RAG, self-hosted model inference, evaluation, fine-tuning, safety, and release.",
     capabilities: [
-      ["Clinical RAG", "Retrieval-augmented generation built for healthcare: grounded answers, citation continuity, honest abstention, and traceable evidence at every step."],
-      ["Evaluation and safety", "Clinician-graded and automated evaluation suites, guardrails, scope controls, and prompt-injection defence. Every pipeline stage gets measured before it ships."],
+      ["Clinical RAG", "Grounded answers that preserve citations and show their evidence. The system refuses when its sources do not support an answer."],
+      ["Evaluation and safety", "Clinician-graded and automated evals for ingestion, retrieval, reranking, prompts, and models. Guardrails, scope controls, and prompt-injection defence."],
       ["Retrieval and data", "Hybrid lexical and semantic search, embeddings, vector databases, reranking, OCR and document processing, PostgreSQL, and object storage."],
-      ["Model serving", "Self-hosted inference on GPU infrastructure with vLLM: model loading, concurrency, latency, throughput, health, and fine-tuning."],
+      ["Model serving", "Run vLLM on self-hosted GPU infrastructure. Tune model loading, concurrency, latency, and throughput. Fine-tune smaller models for defined clinical tasks."],
       ["Software and operations", "Python, TypeScript, APIs, workers, queues, Linux, Docker, Podman, CI/CD, monitoring, backup, and release management."],
     ] as const,
     experience: [
@@ -108,12 +108,12 @@ export const siteContent = {
         period: "February 2025 to present",
         location: "Hybrid, Sunshine Coast, Queensland",
         highlights: [
-          "Conceived and built the initial IRIS clinical RAG system, then led its engineering into a governed Queensland Health delivery context for clinical evaluation and user acceptance testing.",
-          "Built auditable ingestion for PDF, Word, and web content, including text, tables, images, source identity, version detection, and quarantine paths for material that should not be retrieved.",
-          "Built hybrid lexical and semantic retrieval, reranking, row-level table retrieval, citation continuity, and evaluation against realistic clinical questions.",
-          "Operate self-hosted model-serving and document-processing workloads on GPU infrastructure, covering containers, model loading, concurrency, health, latency, and throughput.",
-          "Treat prompts, retrieval, reranking, and model changes as experiments, using clinician-graded and automated evaluations to study failures and decide what to change next.",
-          "Built the surrounding delivery system across APIs, workers, queues, PostgreSQL, object storage, administration tools, audit records, observability, migrations, backup, restore, and controlled releases.",
+          "Conceived and built IRIS and now lead its production rollout to 5,000 Queensland Health clinicians.",
+          "Built auditable ingestion for PDF, Word, and web content, covering text, tables, and images. Added source identity, version detection, and quarantine for material that must not be retrieved.",
+          "Built hybrid lexical and semantic retrieval, reranking, and row-level table retrieval. Preserved citations from retrieved passages to the final answer and tested the system against realistic clinical questions.",
+          "Run self-hosted model inference and document processing on GPU infrastructure. Manage containers, model loading, concurrency, health, latency, and throughput.",
+          "Curate clinical training and evaluation datasets. Run clinician-graded and automated evals and fine-tune smaller models for defined clinical tasks. Use failures to decide what to change next.",
+          "Built the services around IRIS, including APIs, workers, queues, PostgreSQL, and object storage. Added admin tools, audit records, monitoring, backup, restore, and controlled releases.",
         ] as const,
       },
       {
@@ -122,8 +122,8 @@ export const siteContent = {
         period: "September 2022 to present",
         location: "Remote, Sunshine Coast, Queensland",
         highlights: [
-          "Built and operate Opioid Conversion Calculator, a focused medication-safety product for health professionals, including its clinical content, Flutter app, backend, analytics, subscriptions, releases, monitoring, and support.",
-          "Shipped Namely, a preference-led baby-name discovery product, and My Restored Photo, an AI-assisted photo-restoration service with uploads, processing, editing, payments, private storage, and scheduled deletion.",
+          "Built and run Opioid Conversion Calculator, a medication-safety app used by more than 50,000 health professionals. Wrote its clinical content, built the Flutter app and backend, and manage analytics, subscriptions, releases, and support.",
+          "Built Namely, a baby-name app that learns from each swipe. Also built My Restored Photo, an AI photo-restoration service with private uploads, editing, payments, and scheduled deletion.",
         ] as const,
       },
       {
@@ -132,7 +132,7 @@ export const siteContent = {
         period: "August 2026 to present",
         location: "Remote, Sunshine Coast, Queensland",
         highlights: [
-          "Develop private, self-hosted document AI for health and government settings where sensitive data cannot leave the organisation's network, including document search, structured extraction, redaction, and agent workflows.",
+          "Develop private, self-hosted document AI for health and government organisations whose data must stay on their network. Work covers document search, structured extraction, redaction, and agent workflows.",
         ] as const,
       },
     ] as const,

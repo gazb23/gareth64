@@ -139,7 +139,7 @@ export function Terminal({
   function handleKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
       event.preventDefault();
-      onSubmit();
+      if (!busy && !event.nativeEvent.isComposing) onSubmit();
     }
     if (event.key === "ArrowUp") {
       event.preventDefault();
@@ -153,7 +153,7 @@ export function Terminal({
 
   return (
     <div className={styles.paper} onPointerUp={handlePointerUp} role="presentation">
-      <div className={styles.log} ref={logRef} role="log" aria-live="polite" aria-label="Gareth64 terminal output">
+      <div className={`${styles.log} ${showInput ? styles.logWithInput : ""}`} ref={logRef} role="log" aria-live="polite" aria-label="Gareth64 terminal output">
         {lines.map((line, index) => (
           <Fragment key={index}>
             {streaming && index === streamAnchorIndex ? (
@@ -178,28 +178,29 @@ export function Terminal({
             <span className={styles.searchDots} aria-hidden="true" />
           </p>
         )}
-        {showInput && (
-          <div className={styles.inputLine}>
-            <span className={styles.inputText}>{input}</span>
-            <span className={`${styles.cursor} ${busy ? styles.cursorBusy : ""}`} aria-hidden="true" />
-          </div>
-        )}
       </div>
-      <input
-        ref={inputRef}
-        className={styles.hiddenInput}
-        value={input}
-        onChange={(event) => onInputChange(event.target.value)}
-        onKeyDown={handleKeyDown}
-        aria-label="Gareth64 terminal. Type a command such as HELP or DIR"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="characters"
-        spellCheck={false}
-        maxLength={400}
-        enterKeyHint="send"
-        inputMode="none"
-      />
+      {showInput && (
+        <form className={styles.commandInput} onSubmit={(event) => { event.preventDefault(); if (!busy && input.trim()) onSubmit(); }}>
+          <span aria-hidden="true">›</span>
+          <input
+            ref={inputRef}
+            name="command"
+            value={input}
+            onChange={(event) => onInputChange(event.target.value)}
+            onKeyDown={handleKeyDown}
+            aria-label="Ask a question about Gareth"
+            placeholder="Ask about Gareth…"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            maxLength={400}
+            enterKeyHint="send"
+            readOnly={busy}
+          />
+          <button type="submit" disabled={busy || !input.trim()} aria-label="Send question">ASK</button>
+        </form>
+      )}
     </div>
   );
 }

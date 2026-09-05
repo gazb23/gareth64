@@ -8,6 +8,8 @@ export type RagEvalCase =
 export const ragEvalCases = [
   { kind: "supported", id: "identity", category: "supported-question", question: "Who is Gareth?", expectedIds: ["kb-profile-identity"], maxRank: 3 },
   { kind: "supported", id: "positioning", category: "supported-question", question: "What is his professional role?", expectedIds: ["kb-profile-positioning"], maxRank: 3 },
+  { kind: "supported", id: "python-experience", category: "supported-question", question: "Does he have Python experience?", expectedIds: ["kb-profile-skills"], maxRank: 1 },
+  { kind: "supported", id: "tech-stack", category: "paraphrase", question: "What languages does he use?", expectedIds: ["kb-profile-skills"], maxRank: 1 },
   { kind: "supported", id: "clinical-years", category: "supported-question", question: "How many years did he work in pharmacy?", expectedIds: ["kb-clinical-years"], maxRank: 3 },
   { kind: "supported", id: "intensive-care", category: "supported-question", question: "Did he work in intensive care?", expectedIds: ["kb-clinical-icu"], maxRank: 3 },
   { kind: "supported", id: "iris-purpose", category: "supported-question", question: "What is IRIS?", expectedIds: ["kb-iris-purpose"], maxRank: 3 },
@@ -18,6 +20,8 @@ export const ragEvalCases = [
   { kind: "supported", id: "uat", category: "supported-question", question: "What is his approach to UAT?", expectedIds: ["kb-ops-uat"], maxRank: 3 },
   { kind: "supported", id: "abstention", category: "supported-question", question: "How does he handle unsupported answers?", expectedIds: ["kb-safety-abstention"], maxRank: 3 },
   { kind: "supported", id: "opioid-product", category: "supported-question", question: "What clinical calculator did he build?", expectedIds: ["kb-product-opioid"], maxRank: 3 },
+  { kind: "supported", id: "shipped-products", category: "supported-question", question: "What products has he shipped?", expectedIds: ["kb-product-overview"], maxRank: 1 },
+  { kind: "supported", id: "apps-paraphrase", category: "paraphrase", question: "What apps has Gareth made?", expectedIds: ["kb-product-overview"], maxRank: 3 },
   { kind: "supported", id: "namely-product", category: "supported-question", question: "Tell me about the baby name app", expectedIds: ["kb-product-namely"], maxRank: 3 },
   { kind: "supported", id: "photo-product", category: "supported-question", question: "Did he create a photo restoration product?", expectedIds: ["kb-product-photo"], maxRank: 3 },
   { kind: "supported", id: "inky-venture", category: "supported-question", question: "What is Inky Health?", expectedIds: ["kb-product-inky"], maxRank: 3 },

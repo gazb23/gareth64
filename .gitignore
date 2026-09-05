@@ -28,6 +28,7 @@
 /.pnpm-store/
 /output/
 /.venv/
+/tmp/
 
 # debug
 npm-debug.log*

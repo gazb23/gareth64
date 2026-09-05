@@ -49,6 +49,7 @@ function chunk(
 }
 
 export const knowledgeRegistry = [
+  chunk("kb-profile-skills", "profile", "Engineering skills and languages", ["skills", "languages", "tech stack", "python", "typescript", "docker", "podman", "linux"], `Gareth's public résumé lists these capabilities: ${siteContent.resume.capabilities.map(([title, description]) => `${title}: ${description}`).join(" ")}`, "#capabilities", "verified-public"),
   chunk("kb-profile-identity", "profile", "Gareth Beall", ["gareth", "garrett", "garreth", "who is he"], `${siteContent.name} is a Lead AI/ML Engineer based on the Sunshine Coast in Queensland, Australia.`, "#about", "verified-public"),
   chunk("kb-profile-positioning", "profile", "Professional positioning", ["role", "job", "title", "position"], "Gareth leads with AI and machine-learning engineering. Clinical pharmacy is his edge, not the job he is applying for.", "#about"),
   chunk("kb-profile-summary", "profile", "What Gareth builds", ["summary", "overview", "bio"], "Gareth builds production AI systems for settings where evidence, safety, governance, and operational reliability matter.", "#about"),
@@ -56,7 +57,7 @@ export const knowledgeRegistry = [
   chunk("kb-profile-thinking", "principles", "How Gareth thinks", ["thinking", "approach", "mindset"], "He starts with the real decision, the available evidence, and the failure modes. Architecture follows from those constraints rather than from fashion.", "#principles"),
   chunk("kb-profile-candid", "profile", "Candid introduction", ["personality", "candid", "human"], "Gareth is curious, product-minded, and unusually willing to follow difficult technical work through governance, release, and operations rather than stopping at a prototype.", "#about"),
 
-  chunk("kb-profile-ai-tenure", "profile", "AI/ML experience", ["how long", "ai experience", "ml experience", "six years", "started coding", "age twelve", "games"], "Gareth has worked in AI and machine learning for about six years, and has been obsessed since day one. He has been building software his whole life. He started making games at age twelve.", "#about", "verified-public"),
+  chunk("kb-profile-ai-tenure", "profile", "AI/ML experience", ["how long", "ai experience", "ml experience", "six years", "started coding", "age twelve", "games"], "Gareth has worked in AI and machine learning for about six years and has been building software since he was twelve.", "#about", "verified-public"),
 
   chunk("kb-clinical-years", "clinical", "Clinical experience", ["pharmacist", "pharmacy", "years", "healthcare"], "Gareth has fifteen years of clinical pharmacy experience.", "#clinical", "verified-public"),
   chunk("kb-clinical-icu", "clinical", "Intensive care", ["icu", "intensive care", "hospital"], "His clinical background includes intensive-care pharmacy, where ambiguity and medication risk have real consequences.", "#clinical", "verified-public"),
@@ -68,7 +69,7 @@ export const knowledgeRegistry = [
   chunk("kb-iris-purpose", "iris", "IRIS purpose", ["iris purpose", "clinical rag", "what is iris"], "IRIS is a clinical retrieval-augmented generation system designed to give users answers grounded in reviewed source material.", "#iris"),
   chunk("kb-iris-leadership", "iris", "Engineering leadership", ["led", "leadership", "team"], "Gareth led engineering work across IRIS retrieval, evaluation, inference, safety, security, UAT, release, and operations.", "#iris"),
   chunk("kb-iris-governance", "iris", "Governed delivery", ["governance", "public sector", "queensland health"], "IRIS was engineered for governed public-sector delivery, where source control, security review, UAT, release evidence, and operational ownership all matter.", "#iris"),
-  chunk("kb-iris-rigour", "iris", "Healthcare-grade rigour", ["rigour", "rigor", "scrutiny", "state of the art", "why is it hard", "healthcare rag", "what makes iris different"], "Many teams build RAG applications. Few ship one in healthcare. Gareth scrutinised, evaluated, and tuned every stage of the IRIS pipeline: ingestion, retrieval, reranking, prompting, inference, safety. Clinical use demands it.", "#iris"),
+  chunk("kb-iris-rigour", "iris", "Healthcare-grade rigour", ["rigour", "rigor", "scrutiny", "state of the art", "why is it hard", "healthcare rag", "what makes iris different"], "Each stage of IRIS can fail in a different way. Gareth evaluates ingestion, retrieval, reranking, prompting, inference, and safety against realistic clinical questions, then uses the failures to decide what to change next.", "#iris"),
   chunk("kb-iris-scope", "iris", "Public-safe scope", ["confidential", "private", "source code"], "Public descriptions of IRIS deliberately stay at capability level and exclude protected health-system material, private metrics, and internal implementation details.", "#iris"),
 
   chunk("kb-ingestion-reviewed", "retrieval", "Reviewed ingestion", ["ingestion", "documents", "sources"], "IRIS ingestion starts with reviewed sources and records the information needed to trace processed material back to its origin.", "#iris"),
@@ -92,6 +93,7 @@ export const knowledgeRegistry = [
   chunk("kb-safety-evals", "safety", "Safety evaluation", ["red team", "hostile", "prompt injection"], "Evaluation covers supported questions, unsupported claims, privacy probes, prompt injection, and hostile input.", "#iris"),
   chunk("kb-safety-clinical", "safety", "Clinical responsibility", ["clinical advice", "patient", "medical"], "A portfolio assistant can describe Gareth's public work but must not provide patient-specific clinical advice or expose private health-system information.", "#iris"),
 
+  chunk("kb-product-overview", "products", "Products Gareth has built and shipped", ["products", "apps", "portfolio", "shipped", "built outside iris"], `Gareth's public product portfolio includes: ${siteContent.products.map((product) => `${product.name} (${product.role}): ${product.description}`).join(" ")}`, "#products", "verified-public"),
   chunk("kb-product-opioid", "products", "Opioid Conversion Calculator", ["opioid", "calculator", "conversion"], "Gareth built the Opioid Conversion Calculator, a focused clinical tool for health professionals.", "#products", "verified-public"),
   chunk("kb-product-opioid-thinking", "products", "Clinical product translation", ["medication", "clinical tool", "usability"], "The calculator reflects Gareth's ability to translate specialist medication knowledge into a practical product interface.", "#products"),
   chunk("kb-product-namely", "products", "Namely", ["baby name", "names", "namely"], "Gareth built Namely, a consumer product for exploring and comparing baby names.", "#products", "verified-public"),

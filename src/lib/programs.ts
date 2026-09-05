@@ -42,7 +42,7 @@ export function directoryLines(): TermLine[] {
 /** Boot-time invitation: every career tape as a one-click load. */
 export function tapeMenuLines(): TermLine[] {
   return [
-    text("INSERT A TAPE TO BEGIN.", "system"),
+    text("EXPLORE MY WORK. PICK A TAPE:", "system"),
     ...tapes.map((tape) => command(`${tape.number}  ${tape.label}`, `LOAD "${tape.label}",1`)),
   ];
 }
@@ -62,6 +62,7 @@ export function helpLines(): TermLine[] {
     text("POKE 53281,N ... SCREEN COLOUR (0-15)"),
     text("SYS 64738 ...... WARM RESET"),
     gap(),
+    text("OR JUST TYPE A QUESTION ABOUT GARETH.", "dim"),
     text("TIP: F1 = DIR   F3 = LOAD GARETH   F5 = RUN   F7 = HELP", "dim"),
     text('PLAY: LOAD "PONG",1 THEN RUN. ARROW KEYS MOVE.', "dim"),
   ];
@@ -112,7 +113,7 @@ export function programLines(tape: TapeId): TermLine[] {
       text("GARETH BEALL / PROFILE", "system"),
       gap(),
       text("LEAD AI/ML ENGINEER", "bright"),
-      text("AFTER FIFTEEN YEARS AS A CRITICAL CARE PHARMACIST, HE NOW BUILDS THE AI SYSTEMS HOSPITALS ACTUALLY RUN.", "bright"),
+      text("FIFTEEN YEARS AS A CLINICAL PHARMACIST, INCLUDING INTENSIVE CARE. NOW BUILDING CLINICAL AI AT QUEENSLAND HEALTH.", "bright"),
       map(),
       text("* SIX YEARS OBSESSED WITH AI/ML. CODING SINCE AGE 12.", "dim"),
       text("* BUILT IRIS, THE CLINICAL AI ASSISTANT AT QUEENSLAND HEALTH.", "dim"),
@@ -120,7 +121,7 @@ export function programLines(tape: TapeId): TermLine[] {
       text("* SHIPS REAL PRODUCTS PEOPLE PAY FOR.", "dim"),
       gap(),
       text("GARETH.AI IS LISTENING.", "system"),
-      text('TYPE ASK "YOUR QUESTION" OR CLICK ONE:', "dim"),
+      text("TYPE A QUESTION BELOW OR CLICK ONE:", "dim"),
       ...siteContent.starterQuestions.map((q) => command(`? ${q.toUpperCase()}`, starterQuestionCommand(q))),
       gap(),
       ...nextStepLines(tape),

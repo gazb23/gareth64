@@ -3,6 +3,9 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useCallback, useEffect, useReducer, useRef, useState, useSyncExternalStore } from "react";
 
+import dynamic from "next/dynamic";
+import Link from "next/link";
+
 import { siteContent } from "@/content/site";
 import { tapes, tapesById, type Tape, type TapeId } from "@/content/tapes";
 import type { ViewTarget } from "@/content/views";
@@ -14,10 +17,13 @@ import { C64_PALETTE, command, evidence, gap, text, type TermLine } from "@/lib/
 import { useTerminal } from "@/lib/use-terminal";
 
 import { C64Keyboard, FUNCTION_KEYS, KEYBOARD_ROWS, SPACE_KEY, type KeyDef } from "./C64Keyboard";
-import { Pong } from "./Pong";
+import { ResumeDialog } from "./ResumeDialog";
+
 import { ScreenViewer } from "./ScreenViewer";
 import { Terminal } from "./Terminal";
 import styles from "./gareth64.module.css";
+
+const Pong = dynamic(() => import("./Pong").then((module) => module.Pong));
 
 const initialState: MachineState = { kind: "off" };
 const muteEvent = "gareth64-mute-change";
@@ -35,13 +41,13 @@ function subscribeToMute(callback: () => void) {
 }
 
 function getMuteSnapshot() {
-  return window.localStorage.getItem("gareth64-muted") === "true";
+  try { return window.localStorage.getItem("gareth64-muted") !== "false"; } catch { return true; }
 }
 
 function usePersistentMute() {
-  const muted = useSyncExternalStore(subscribeToMute, getMuteSnapshot, () => false);
+  const muted = useSyncExternalStore(subscribeToMute, getMuteSnapshot, () => true);
   const toggle = useCallback(() => {
-    window.localStorage.setItem("gareth64-muted", String(!getMuteSnapshot()));
+    try { window.localStorage.setItem("gareth64-muted", String(!getMuteSnapshot())); } catch { return; }
     window.dispatchEvent(new Event(muteEvent));
   }, []);
   return [muted, toggle] as const;
@@ -118,14 +124,14 @@ const BOOT_LINES: TermLine[] = [
 const MONITOR_KNOBS = ["TINT", "COLOR", "BRIGHT", "CONT", "H.POS", "V.HOLD", "VOL"] as const;
 
 /** Sections that exist in the quick-view résumé; anything else lands at the top. */
-const QUICK_VIEW_ANCHORS = new Set(["about", "iris", "products", "contact"]);
+const QUICK_VIEW_ANCHORS = new Set(["about", "experience", "iris", "capabilities", "products", "contact"]);
 
 function quickViewAnchor(canonicalUrl: string): string {
   const hash = canonicalUrl.split("#")[1] ?? "";
   return QUICK_VIEW_ANCHORS.has(hash) ? hash : "about";
 }
 
-const normaliseQuestion = (question: string) => question.trim().toLowerCase();
+const normaliseQuestion = (question: string) => question.trim().toLowerCase().replace(/[?!.]+$/, "");
 
 /** Evidence anchor → the tape that tells the fuller story. */
 const TAPE_SUGGESTIONS = [
@@ -161,7 +167,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
   const audio = useMachineAudio(muted);
   const term = useTerminal({ reducedMotion });
   const [pressedKey, setPressedKey] = useState<string | null>(null);
-  const [keysVisible, setKeysVisible] = useState(false);
+  const [keysVisible, setKeysVisible] = useState(true);
   const [palette, setPalette] = useState<{ readonly border?: string; readonly paper?: string }>({});
   const [counter, setCounter] = useState("000");
   const [view, setView] = useState<ViewTarget | null>(null);
@@ -186,7 +192,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
   const audioRef = useRef(audio);
 
   const focusInput = useCallback(() => {
-    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (document.querySelector("dialog[open]") || !window.matchMedia("(pointer: fine)").matches) return;
     inputRef.current?.focus({ preventScroll: true });
   }, []);
 
@@ -277,6 +283,8 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
       setView(effect.view);
       return;
     }
+    setEverLoaded(true);
+    setView(null);
     void runAskRef.current(effect.question);
   }, [term]);
 
@@ -288,6 +296,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
   }, [focusInput]);
 
   const execute = useCallback((raw: string) => {
+    if (termRef.current.streaming) return;
     const value = raw.trim();
     term.commitEcho(raw);
     if (!value) return;
@@ -305,6 +314,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
   const executeRef = useRef(execute);
 
   const typeCommand = useCallback((command: string) => {
+    if (termRef.current.streaming) return;
     if (typeTimerRef.current) window.clearInterval(typeTimerRef.current);
     focusInput();
     term.setInput("");
@@ -315,7 +325,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
       if (index >= command.length) {
         if (typeTimerRef.current) window.clearInterval(typeTimerRef.current);
         typeTimerRef.current = null;
-        window.setTimeout(() => executeRef.current(command), reducedMotion ? 40 : 240);
+        executeRef.current(command);
       }
     }, reducedMotion ? 6 : 34);
   }, [focusInput, term, reducedMotion]);
@@ -405,22 +415,22 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
 
   // Power-on flash, then boot.
   useEffect(() => {
-    if (state.kind !== "powering-on") return;
+    if (visibleState.kind !== "powering-on") return;
     const timer = window.setTimeout(() => dispatch({ type: "POWERED" }), reducedMotion ? 40 : 620);
     return () => window.clearTimeout(timer);
-  }, [state.kind, reducedMotion]);
+  }, [visibleState.kind, reducedMotion]);
 
   // Boot banner, then ready.
   useEffect(() => {
-    if (state.kind !== "booting") return;
+    if (visibleState.kind !== "booting") return;
     termRef.current.print(BOOT_LINES);
     const timer = window.setTimeout(() => dispatch({ type: "BOOT_COMPLETE" }), reducedMotion ? 120 : 1750);
     return () => window.clearTimeout(timer);
-  }, [state.kind, reducedMotion]);
+  }, [visibleState.kind, reducedMotion]);
 
   // Arriving at ready: greet once after boot, note ejects.
   useEffect(() => {
-    if (state.kind !== "ready") return;
+    if (visibleState.kind !== "ready") return;
     const prev = prevKindRef.current;
     if (prev === "booting" || prev === "powering-on" || prev === "off") {
       if (!bootedOnceRef.current) {
@@ -435,7 +445,6 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
       } else {
         termRef.current.printNow([text("READY.")]);
       }
-      focusInput();
       return;
     }
     if (prev === "program" || prev === "error") {
@@ -443,7 +452,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
       return;
     }
     termRef.current.printNow([text("READY.")]);
-  }, [state.kind, focusInput]);
+  }, [visibleState.kind, focusInput]);
 
   // Quick view opened from an evidence card: jump to the cited section.
   useEffect(() => {
@@ -459,8 +468,8 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
 
   // Tape loading: screech, counter, border stripes (via .tubeLoading), then run.
   useEffect(() => {
-    if (state.kind !== "loading") return;
-    const label = tapesById.get(state.tape)?.label ?? state.tape;
+    if (visibleState.kind !== "loading") return;
+    const label = tapesById.get(visibleState.tape)?.label ?? visibleState.tape;
     audioRef.current.screech();
     termRef.current.print([
       text("PRESS PLAY ON TAPE"),
@@ -482,19 +491,19 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
       window.clearTimeout(timer);
       setCounter("000");
     };
-  }, [state, reducedMotion]);
+  }, [visibleState, reducedMotion]);
 
   // Program start (from a fresh load only): READY. RUN, then the listing.
   useEffect(() => {
-    if (state.kind !== "program" || prevKindRef.current !== "loading") return;
+    if (visibleState.kind !== "program" || prevKindRef.current !== "loading") return;
     termRef.current.clear();
-    termRef.current.printFromStart(programLines(state.tape));
-  }, [state]);
+    termRef.current.printFromStart(programLines(visibleState.tape));
+  }, [visibleState]);
 
   // Tracks the previous machine kind so the effects above can tell arrivals apart.
   useEffect(() => {
-    prevKindRef.current = state.kind;
-  }, [state.kind]);
+    prevKindRef.current = visibleState.kind;
+  }, [visibleState.kind]);
 
   // Physical keyboard: highlight keys, click sounds, route typing to the terminal.
   useEffect(() => {
@@ -510,6 +519,8 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
         }
         return;
       }
+      const typingInTerminal = event.target === inputRef.current;
+      if (!typingInTerminal && event.key !== "Escape" && event.target instanceof Element && event.target.closest("a, button, input, textarea, select, [contenteditable=\"true\"]")) return;
       const kind = visibleRef.current.kind;
       if (kind === "off") {
         if (event.key === " " || event.key === "Enter") {
@@ -536,6 +547,11 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
       if (playing || event.metaKey || event.ctrlKey || event.altKey) return;
       const typingHere = document.activeElement === inputRef.current;
       const typeable = kind === "ready" || kind === "program";
+      if (def?.command && typeable) {
+        event.preventDefault();
+        typeCommandRef.current(def.command);
+        return;
+      }
       if (typingHere || !typeable) return;
       if (event.key === "Enter") {
         event.preventDefault();
@@ -573,6 +589,8 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
   const deckLabel = inserted ? `${inserted.label} IN DECK` : "DECK EMPTY";
   const canTypeNow = canType && !playingPong;
 
+  const closeResume = useCallback(() => dispatch({ type: "CLOSE_QUICK_VIEW" }), []);
+
   return (
     <main id="main-content" className={styles.experience} style={paletteStyle}>
       <section className={`${styles.scene} ${keysVisible ? styles.keysVisible : ""}`} aria-label="Interactive Gareth64 résumé computer">
@@ -583,12 +601,30 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
             <button className={styles.keysToggle} type="button" onClick={() => setKeysVisible((value) => !value)} aria-pressed={keysVisible}>
               {keysVisible ? "HIDE KEYS" : "KEYBOARD"}
             </button>
-            <button type="button" onClick={() => dispatch({ type: "OPEN_QUICK_VIEW" })}>VIEW RÉSUMÉ</button>
+            <Link className={styles.resumeLink} href="/resume">VIEW RÉSUMÉ <span aria-hidden="true">↗</span></Link>
             <button type="button" onClick={toggleMuted} aria-pressed={muted}>{muted ? "SOUND OFF" : "SOUND ON"}</button>
           </div>
         </header>
 
         <div className={styles.desk}>
+          <div className={styles.intro}>
+            <p className={styles.eyebrow}>Sunshine Coast, Australia</p>
+            <h1>I build AI.<br /><em>And the software around it.</em></h1>
+            <p className={styles.introCopy}>I&#39;m Gareth. I build clinical AI and software products, with fifteen years as a clinical pharmacist behind me.</p>
+            <p className={styles.currentWork}>I conceived and built <strong>IRIS</strong>. Now I lead its production rollout for 5,000 Queensland Health clinicians.</p>
+            <div className={styles.introActions}>
+              <Link href="/resume">Read my résumé <span aria-hidden="true">↗</span></Link>
+              <a href={`/${siteContent.resume.fileName}`} download>Download PDF <span aria-hidden="true">↓</span></a>
+            </div>
+            <dl className={styles.credentials}>
+              <div><dt>6 years</dt><dd>AI / ML engineering</dd></div>
+              <div><dt>50,000+</dt><dd>Health professionals using my app</dd></div>
+            </dl>
+            <div className={styles.playNote}>
+              <span aria-hidden="true">↳</span>
+              <p>Coding since I was twelve. Some things stick.<br /><strong>Pick a tape. Explore my work. Ask the AI.</strong></p>
+            </div>
+          </div>
           <div className={styles.machine}>
           <div className={`${styles.monitor} ${screenOn ? styles.monitorLive : ""}`}>
             <div className={styles.monitorShell}>
@@ -609,7 +645,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
                               <Terminal
                                 lines={term.lines}
                                 input={term.input}
-                                showInput={canTypeNow}
+                                showInput={canTypeNow || visibleState.kind === "streaming"}
                                 busy={term.busy}
                                 printing={term.printing}
                                 streaming={term.streaming}
@@ -717,10 +753,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
           </aside>
 
           <div className={styles.bench}>
-            <div
-              className={styles.breadbin}
-              onClick={keysVisible ? undefined : () => setKeysVisible(true)}
-            >
+            <div className={styles.breadbin}>
               <div className={styles.ridge} aria-hidden="true" />
               <div className={styles.caseTop}>
                 <span className={styles.badge}>GARETH <i>64</i></span>
@@ -766,6 +799,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
         </div>
 
         <footer className={styles.hints}>
+          <a href={`mailto:${siteContent.email}`}>GET IN TOUCH ↗</a>
           <span>TYPE HELP</span><span>F1 = DIR</span><span>F5 = RUN</span><span>ESC = BREAK</span>
           {(visibleState.kind === "program" || visibleState.kind === "streaming") && (
             <button type="button" onClick={() => typeCommand("EJECT")}>EJECT TAPE</button>
@@ -774,12 +808,7 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
       </section>
 
       {state.kind === "quick-view" && (
-        <div className={styles.quickOverlay} role="dialog" aria-modal="true" aria-label="Fast résumé view">
-          <button className={styles.closeOverlay} type="button" onClick={() => dispatch({ type: "CLOSE_QUICK_VIEW" })} autoFocus>
-            CLOSE [ESC]
-          </button>
-          {overlayQuickView}
-        </div>
+        <ResumeDialog onClose={closeResume}>{overlayQuickView}</ResumeDialog>
       )}
     </main>
   );

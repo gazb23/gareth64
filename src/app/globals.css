@@ -20,3 +20,4 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .skip-link:focus { transform: translateY(0); }
 noscript article { display: block; }
 @media print { @page { size: A4; margin: 12mm; } body { color: #111; background: #fff; } a { text-decoration: none; } .skip-link { display: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

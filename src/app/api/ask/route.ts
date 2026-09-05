@@ -44,7 +44,7 @@ function errorResponse(error: string, status: number, headers?: Readonly<Record<
 
 function fallbackAnswer(results: readonly RetrievalResult[]): string {
   if (results.length === 0) {
-    return "42 BLOCKS SEARCHED. ZERO FACTS INVENTED. Try asking what Gareth built with IRIS.";
+    return "I couldn't find evidence for that in Gareth's public résumé. Try asking about IRIS, his products or experience.";
   }
   return results.slice(0, 3).map((result) => result.chunk.text).join(" ");
 }
@@ -85,7 +85,7 @@ export async function POST(request: Request): Promise<Response> {
     ? lexicalAssessment
     : assessRetrieval(question, fallbackRetrieval);
   const unsupported = assessment.kind === "unsupported";
-  const sources = sourceCards(unsupported ? fallbackRetrieval.slice(0, 2) : fallbackRetrieval);
+  const sources = sourceCards(unsupported ? [] : fallbackRetrieval);
   const followUps = unsupported
     ? ["What did Gareth build with IRIS?", "What makes him different?"]
     : siteContent.starterQuestions.filter((candidate) => candidate !== question).slice(0, 3);
@@ -100,7 +100,7 @@ export async function POST(request: Request): Promise<Response> {
       }));
 
       if (unsupported) {
-        controller.enqueue(encode({ type: "text", delta: "42 BLOCKS SEARCHED. ZERO FACTS INVENTED. I can answer questions about Gareth's public work, projects, approach, and interests." }));
+        controller.enqueue(encode({ type: "text", delta: "I couldn't find evidence to answer that in Gareth's public résumé. Try asking about his work, products, skills or experience." }));
         controller.enqueue(encode({ type: "done", citationIds: sources.map((source) => source.id) }));
         controller.close();
         return;

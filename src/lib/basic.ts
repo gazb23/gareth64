@@ -3,7 +3,7 @@ import { resolveView, type ViewTarget } from "@/content/views";
 
 import type { MachineEvent, MachineState } from "./machine";
 import { directoryLines, helpLines, listingLines, programLines } from "./programs";
-import { command, gap, text, type TermLine } from "./terminal";
+import { gap, text, type TermLine } from "./terminal";
 
 export type BasicEffect =
   | { readonly type: "clear" }
@@ -56,6 +56,16 @@ function loadEvents(tape: TapeId, state: BasicContext["state"]): MachineEvent[] 
   if (state.kind === "program" || state.kind === "error") events.push({ type: "EJECT" });
   events.push({ type: "SELECT_TAPE", tape }, { type: "LOAD_TAPE" });
   return events;
+}
+
+function askQuestion(question: string, state: BasicContext["state"]): BasicResult {
+  if (state.kind !== "ready" && state.kind !== "program") {
+    return { lines: withReady([text("PLEASE WAIT UNTIL THE COMPUTER IS READY.", "dim")]), events: [] };
+  }
+  if (question.length < 2 || question.length > 400) {
+    return { lines: withReady([text("ASK ABOUT GARETH IN 2–400 CHARACTERS.", "dim")]), events: [] };
+  }
+  return { lines: [], events: [], effect: { type: "ask", question } };
 }
 
 export function runCommand(raw: string, ctx: BasicContext): BasicResult {
@@ -113,20 +123,7 @@ export function runCommand(raw: string, ctx: BasicContext): BasicResult {
 
   const askMatch = /^ASK\s+"?(.+?)"?\s*$/i.exec(input);
   if (askMatch?.[1]) {
-    const question = askMatch[1];
-    if (state.kind === "program" && state.tape === "gareth") {
-      return { lines: [], events: [], effect: { type: "ask", question } };
-    }
-    return {
-      lines: [
-        text("?DEVICE NOT PRESENT ERROR", "error"),
-        text("GARETH.AI LIVES ON TAPE 01. LOAD IT FIRST:", "dim"),
-        command('LOAD "GARETH",1', 'LOAD "GARETH",1'),
-        gap(),
-        ready,
-      ],
-      events: [],
-    };
+    return askQuestion(askMatch[1].trim(), state);
   }
 
   const viewMatch = /^VIEW\s+"?(.+?)"?\s*$/i.exec(input);
@@ -178,8 +175,8 @@ export function runCommand(raw: string, ctx: BasicContext): BasicResult {
   if (/^SYS\s+64738$/.test(upper)) return { lines: [], events: [], effect: { type: "reset" } };
   if (/^SYS\s+\d+$/.test(upper)) return { lines: [text("NOTHING HAPPENS.", "dim"), gap(), ready], events: [] };
 
-  if (/^(HELLO|HI|HEY|YO)\b/.test(upper)) {
-    return { lines: [text("GREETINGS, HUMAN. TYPE HELP IF LOST.", "bright"), gap(), ready], events: [] };
+  if (/^(HELLO|HI|HEY|YO)[!.]*$/.test(upper)) {
+    return { lines: withReady([text("HELLO! ASK ME ABOUT GARETH'S WORK, SKILLS OR EXPERIENCE.", "bright")]), events: [] };
   }
 
   if (upper === "WHOAMI") {
@@ -190,5 +187,7 @@ export function runCommand(raw: string, ctx: BasicContext): BasicResult {
     return { lines: withReady(mazeLines()), events: [] };
   }
 
-  return { lines: [syntaxError, gap(), ready], events: [] };
+  // Preserve errors for malformed BASIC instructions; ordinary text is a question.
+  if (/^(POKE|SYS)\b/.test(upper)) return { lines: [syntaxError, gap(), ready], events: [] };
+  return askQuestion(input, state);
 }

@@ -1,11 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { resolveTape, runCommand, type BasicContext } from "./basic";
-import type { MachineState } from "./machine";
 
-const ctx = (state: MachineState = { kind: "ready", selectedTape: null }): BasicContext => ({
-  state: state as Exclude<MachineState, { kind: "quick-view" }>,
-});
+const ctx = (state: BasicContext["state"] = { kind: "ready", selectedTape: null }): BasicContext => ({ state });
 
 const texts = (result: ReturnType<typeof runCommand>) =>
   result.lines.filter((line) => line.kind === "text").map((line) => line.text);
@@ -82,13 +79,35 @@ describe("runCommand", () => {
     expect(texts(result).join("\n")).toContain("10 REM *** GARETH.AI ***");
   });
 
-  it("routes ASK to the ask effect only from the gareth program", () => {
-    const ok = runCommand('ASK "What did he build?"', ctx({ kind: "program", tape: "gareth" }));
-    expect(ok.effect).toEqual({ type: "ask", question: "What did he build?" });
+  it.each<BasicContext["state"]>([
+    { kind: "ready", selectedTape: null },
+    { kind: "program", tape: "gareth" },
+    { kind: "program", tape: "iris" },
+  ])("accepts ordinary questions and legacy ASK syntax from $kind $tape", (state) => {
+    for (const input of ["What did he build?", 'ASK "What did he build?"', "ASK What did he build?"]) {
+      expect(runCommand(input, ctx(state)).effect).toEqual({ type: "ask", question: "What did he build?" });
+    }
+  });
 
-    const denied = runCommand('ASK "anything"', ctx({ kind: "program", tape: "iris" }));
-    expect(denied.effect).toBeUndefined();
-    expect(texts(denied)[0]).toContain("?DEVICE NOT PRESENT ERROR");
+  it.each([
+    "Who is Gareth?", "what makes him different", "What did he build with IRIS?",
+    "What products has he shipped?", "Where is he based?", "Python experience",
+    "Hey, what has Gareth built?", 'What does "clinical AI" mean in his work?',
+  ])("passes natural language through without rewriting it: %s", (question) => {
+    expect(runCommand(`  ${question}  `, ctx()).effect).toEqual({ type: "ask", question });
+  });
+
+  it.each<BasicContext["state"]>([
+    { kind: "off" }, { kind: "booting", skippable: true },
+    { kind: "loading", tape: "iris" }, { kind: "streaming", tape: "gareth" },
+  ])("does not start a question while $kind", (state) => {
+    expect(runCommand("Who is Gareth?", ctx(state)).effect).toBeUndefined();
+  });
+
+  it.each(["x", "x".repeat(401)])("explains invalid question length", (question) => {
+    const result = runCommand(question, ctx());
+    expect(result.effect).toBeUndefined();
+    expect(texts(result)[0]).toContain("2–400 CHARACTERS");
   });
 
   it("parses POKE with range checking", () => {
@@ -137,8 +156,8 @@ describe("runCommand", () => {
     expect(runCommand("RESUME", ctx()).events).toEqual([{ type: "OPEN_QUICK_VIEW" }]);
   });
 
-  it("rejects unknown commands with a syntax error", () => {
-    const result = runCommand("FORMAT C:", ctx());
+  it("still reports malformed BASIC instructions", () => {
+    const result = runCommand("POKE 53280,no", ctx());
     expect(texts(result)[0]).toBe("?SYNTAX ERROR");
   });
 
