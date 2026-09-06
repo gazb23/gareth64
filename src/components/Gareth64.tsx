@@ -611,14 +611,14 @@ export function Gareth64({ overlayQuickView }: { readonly overlayQuickView: Reac
             <p className={styles.eyebrow}>Sunshine Coast, Australia</p>
             <h1>I build AI.<br /><em>And the software around it.</em></h1>
             <p className={styles.introCopy}>I&#39;m Gareth. I build clinical AI and software products, with fifteen years as a clinical pharmacist behind me.</p>
-            <p className={styles.currentWork}>I conceived and built <strong>IRIS</strong>. Now I lead its production rollout for 5,000 Queensland Health clinicians.</p>
+            <p className={styles.currentWork}>I conceived and built <strong>IRIS</strong>, now in clinical use following a rollout covering 5,000 Queensland Health clinicians.</p>
             <div className={styles.introActions}>
               <Link href="/resume">Read my résumé <span aria-hidden="true">↗</span></Link>
               <a href={`/${siteContent.resume.fileName}`} download>Download PDF <span aria-hidden="true">↓</span></a>
             </div>
             <dl className={styles.credentials}>
-              <div><dt>6 years</dt><dd>AI / ML engineering</dd></div>
-              <div><dt>50,000+</dt><dd>Health professionals using my app</dd></div>
+              <div><dt>10,000+</dt><dd>Guidelines in IRIS</dd></div>
+              <div><dt>50,000+</dt><dd>Calculator downloads worldwide</dd></div>
             </dl>
             <div className={styles.playNote}>
               <span aria-hidden="true">↳</span>

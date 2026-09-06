@@ -43,10 +43,18 @@ export function QuickView({ compact = false, embedded = false }: QuickViewProps)
       <section className={styles.experience} id="experience">
         <div className={styles.sectionHeading}><p className={styles.sectionLabel}>Experience</p><h2>What I&#39;ve built.</h2></div>
         <div className={styles.timeline}>
-          {siteContent.resume.experience.map((job) => (
+          {siteContent.resume.experience.map((job, index) => (
             <article className={styles.job} key={job.organisation}>
-              <div><p className={styles.period}>{job.period}</p><h3>{job.role}</h3><p className={styles.organisation}>{job.organisation}</p><p className={styles.jobLocation}>{job.location}</p></div>
-              <ul>{job.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}</ul>
+              <div><p className={styles.period}>{job.period}</p><h3>{job.role}</h3><p className={styles.organisation}>{job.organisation}</p>{job.location && <p className={styles.jobLocation}>{job.location}</p>}</div>
+              <div>
+                <ul>{job.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}</ul>
+                {index === 0 && siteContent.resume.engineeringSections.map((section) => (
+                  <div key={section.title}>
+                    <h4>{section.title}</h4>
+                    <ul>{section.bullets.map((highlight) => <li key={highlight}>{highlight}</li>)}</ul>
+                  </div>
+                ))}
+              </div>
             </article>
           ))}
         </div>
@@ -85,12 +93,13 @@ export function QuickView({ compact = false, embedded = false }: QuickViewProps)
       <section className={styles.capabilities} id="capabilities">
         <div className={styles.sectionHeading}><p className={styles.sectionLabel}>Engineering</p><h2>The work behind the answer.</h2></div>
         <dl>{siteContent.resume.capabilities.map(([title, description]) => <div key={title}><dt>{title}</dt><dd>{description}</dd></div>)}</dl>
+        <p>{siteContent.resume.clinicalBackground}</p>
         <p className={styles.education}><strong>{siteContent.resume.education.qualification}</strong> · {siteContent.resume.education.institution} · {siteContent.resume.education.year}</p>
       </section>
 
       <section className={styles.products} id="products">
-        <p className={styles.sectionLabel}>Independent products</p>
-        <h2>Useful things, shipped</h2>
+        <p className={styles.sectionLabel}>Independent work</p>
+        <h2>Products and projects</h2>
         <div className={styles.productGrid}>
           {siteContent.products.map((product, index) => (
             <a href={product.href} target="_blank" rel="noreferrer" key={product.name}>
@@ -121,4 +130,3 @@ export function QuickView({ compact = false, embedded = false }: QuickViewProps)
     </article>
   );
 }
-

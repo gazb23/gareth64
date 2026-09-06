@@ -2,457 +2,127 @@ from __future__ import annotations
 
 import argparse
 import json
+from html import escape
 from pathlib import Path
-from typing import Any
 
+from pypdf import PdfReader
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.platypus import (
-    BaseDocTemplate,
-    Frame,
-    PageBreak,
-    PageTemplate,
-    Paragraph,
-    Spacer,
-    Table,
-    TableStyle,
-)
+from reportlab.platypus import SimpleDocTemplate, Paragraph, PageBreak
+
+INK = colors.HexColor("#1B252D")
+MUTED = colors.HexColor("#52616A")
+ACCENT = colors.HexColor("#315E58")
+styles = {
+    'name': ParagraphStyle('name', fontName='Helvetica-Bold', fontSize=26, leading=30, textColor=INK, spaceAfter=5),
+    'headline': ParagraphStyle('headline', fontName='Helvetica-Bold', fontSize=12, leading=16, textColor=ACCENT, spaceAfter=6),
+    'contact': ParagraphStyle('contact', fontName='Helvetica', fontSize=9.3, leading=13, textColor=MUTED, spaceAfter=10),
+    'body': ParagraphStyle('body', fontName='Helvetica', fontSize=10.8, leading=14.5, textColor=INK, spaceAfter=5),
+    'section': ParagraphStyle('section', fontName='Helvetica-Bold', fontSize=11, leading=15, textColor=ACCENT, spaceBefore=7, spaceAfter=5, keepWithNext=True),
+    'role': ParagraphStyle('role', fontName='Helvetica-Bold', fontSize=11, leading=15, textColor=INK, spaceAfter=3, keepWithNext=True),
+    'meta': ParagraphStyle('meta', fontName='Helvetica', fontSize=9.3, leading=13, textColor=MUTED, spaceAfter=4, keepWithNext=True),
+    'bullet': ParagraphStyle('bullet', fontName='Helvetica', fontSize=10.8, leading=14.5, textColor=INK, leftIndent=10, bulletIndent=0, spaceAfter=4),
+    'continued': ParagraphStyle('continued', fontName='Helvetica-Bold', fontSize=14, leading=18, textColor=INK, spaceAfter=6, keepWithNext=True),
+}
+
+def para(text, style="body"):
+    return Paragraph(escape(text), styles[style])
 
 
-PAPER = colors.HexColor("#F3F0E8")
-INK = colors.HexColor("#171B19")
-MOSS = colors.HexColor("#335E4A")
-MID = colors.HexColor("#525C56")
-HAIRLINE = colors.HexColor("#C8C9C0")
-PALE_MOSS = colors.HexColor("#E4E9E2")
-WHITE = colors.white
+def bullet(text):
+    return Paragraph(escape(text), styles["bullet"], bulletText="-")
 
 
-def escape(value: str) -> str:
-    return (
-        value.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-    )
+def section(group):
+    return [para(group["title"], "section"), *(bullet(text) for text in group["bullets"])]
 
 
-def link(url: str, label: str, colour: str = "#335E4A") -> str:
-    return f'<link href="{escape(url)}" color="{colour}">{escape(label)}</link>'
+def footer(canvas, document):
+    canvas.saveState()
+    canvas.setStrokeColor(colors.HexColor("#D6DEDC"))
+    canvas.setLineWidth(.5)
+    canvas.line(17 * mm, 14 * mm, A4[0] - 17 * mm, 14 * mm)
+    canvas.setFont("Helvetica", 8)
+    canvas.setFillColor(MUTED)
+    canvas.drawString(17 * mm, 10 * mm, "Gareth Beall | garethbeall.com")
+    canvas.drawRightString(A4[0] - 17 * mm, 10 * mm, f"{document.page} / 2")
+    canvas.restoreState()
 
 
-class ResumeDocument(BaseDocTemplate):
-    def __init__(self, filename: str, *, title: str, author: str):
-        super().__init__(
-            filename,
-            pagesize=A4,
-            leftMargin=17 * mm,
-            rightMargin=17 * mm,
-            topMargin=15 * mm,
-            bottomMargin=15 * mm,
-            title=title,
-            author=author,
-            subject="Professional resume for Gareth Beall, Lead AI/ML Engineer",
-            creator="Gareth64 resume generator",
-        )
-        frame = Frame(
-            self.leftMargin,
-            self.bottomMargin,
-            self.width,
-            self.height,
-            leftPadding=0,
-            rightPadding=0,
-            topPadding=0,
-            bottomPadding=0,
-            id="resume",
-        )
-        self.addPageTemplates(PageTemplate(id="resume", frames=[frame], onPage=self._decorate_page))
-
-    def _decorate_page(self, canvas, document) -> None:
-        width, height = A4
-        canvas.saveState()
-        canvas.setTitle(self.title)
-        canvas.setAuthor(self.author)
-        canvas.setSubject("Professional resume for Gareth Beall, Lead AI/ML Engineer")
-        canvas.setKeywords("clinical AI, RAG, LLM, machine learning, pharmacist, retrieval, evaluation")
-        canvas.setFillColor(PAPER)
-        canvas.rect(0, 0, width, height, stroke=0, fill=1)
-        canvas.setStrokeColor(MOSS)
-        canvas.setLineWidth(1.6)
-        canvas.line(self.leftMargin, height - 9 * mm, width - self.rightMargin, height - 9 * mm)
-        canvas.setFont("Courier-Bold", 7)
-        canvas.setFillColor(MOSS)
-        canvas.drawString(self.leftMargin, 8 * mm, "GARETH64 / CAREER FILE")
-        canvas.setFont("Helvetica", 7)
-        canvas.setFillColor(MID)
-        canvas.drawRightString(width - self.rightMargin, 8 * mm, f"PAGE {document.page:02d}")
-        canvas.restoreState()
-
-
-def make_styles() -> dict[str, ParagraphStyle]:
-    sample = getSampleStyleSheet()
-    return {
-        "machine": ParagraphStyle(
-            "Machine",
-            parent=sample["Normal"],
-            fontName="Courier-Bold",
-            fontSize=7.5,
-            leading=9,
-            textColor=MOSS,
-            spaceAfter=5,
-        ),
-        "band": ParagraphStyle(
-            "Band",
-            parent=sample["Normal"],
-            fontName="Courier-Bold",
-            fontSize=7.5,
-            leading=9,
-            textColor=WHITE,
-            spaceAfter=0,
-        ),
-        "name": ParagraphStyle(
-            "Name",
-            parent=sample["Title"],
-            fontName="Helvetica-Bold",
-            fontSize=29,
-            leading=30,
-            textColor=INK,
-            spaceAfter=4,
-        ),
-        "headline": ParagraphStyle(
-            "Headline",
-            parent=sample["Normal"],
-            fontName="Helvetica-Bold",
-            fontSize=13,
-            leading=16,
-            textColor=MOSS,
-            spaceAfter=7,
-        ),
-        "lead": ParagraphStyle(
-            "Lead",
-            parent=sample["Normal"],
-            fontName="Helvetica",
-            fontSize=9.5,
-            leading=14,
-            textColor=INK,
-            spaceAfter=7,
-        ),
-        "contact": ParagraphStyle(
-            "Contact",
-            parent=sample["Normal"],
-            fontName="Helvetica",
-            fontSize=8.2,
-            leading=11,
-            textColor=MID,
-            spaceAfter=0,
-        ),
-        "section": ParagraphStyle(
-            "Section",
-            parent=sample["Heading2"],
-            fontName="Courier-Bold",
-            fontSize=8,
-            leading=10,
-            textColor=MOSS,
-            spaceBefore=8,
-            spaceAfter=5,
-            keepWithNext=True,
-        ),
-        "role": ParagraphStyle(
-            "Role",
-            parent=sample["Heading3"],
-            fontName="Helvetica-Bold",
-            fontSize=10.8,
-            leading=13,
-            textColor=INK,
-            spaceAfter=1,
-            keepWithNext=True,
-        ),
-        "meta": ParagraphStyle(
-            "Meta",
-            parent=sample["Normal"],
-            fontName="Helvetica-Oblique",
-            fontSize=8,
-            leading=10,
-            textColor=MID,
-            spaceAfter=4,
-            keepWithNext=True,
-        ),
-        "bullet": ParagraphStyle(
-            "Bullet",
-            parent=sample["Normal"],
-            fontName="Helvetica",
-            fontSize=8.35,
-            leading=11.2,
-            textColor=INK,
-            leftIndent=10,
-            firstLineIndent=-7,
-            bulletIndent=0,
-            spaceAfter=3,
-        ),
-        "body": ParagraphStyle(
-            "Body",
-            parent=sample["Normal"],
-            fontName="Helvetica",
-            fontSize=8.5,
-            leading=11.5,
-            textColor=INK,
-            spaceAfter=4,
-        ),
-        "itemTitle": ParagraphStyle(
-            "ItemTitle",
-            parent=sample["Normal"],
-            fontName="Helvetica-Bold",
-            fontSize=8.6,
-            leading=10.5,
-            textColor=INK,
-            spaceAfter=1,
-        ),
-        "itemText": ParagraphStyle(
-            "ItemText",
-            parent=sample["Normal"],
-            fontName="Helvetica",
-            fontSize=7.7,
-            leading=10,
-            textColor=MID,
-        ),
-        "rightMeta": ParagraphStyle(
-            "RightMeta",
-            parent=sample["Normal"],
-            fontName="Helvetica",
-            fontSize=8,
-            leading=10,
-            textColor=MID,
-            alignment=TA_RIGHT,
-        ),
-    }
-
-
-def section_heading(label: str, styles: dict[str, ParagraphStyle]) -> Table:
-    table = Table(
-        [[Paragraph(escape(label.upper()), styles["section"]), ""]],
-        colWidths=[47 * mm, 129 * mm],
-    )
-    table.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
-                ("LINEBELOW", (0, 0), (-1, -1), 0.55, HAIRLINE),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("TOPPADDING", (0, 0), (-1, -1), 0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-            ]
-        )
-    )
-    return table
-
-
-def experience_block(entry: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    title = f"{escape(entry['role'])} <font color='#525C56'>/ {escape(entry['organisation'])}</font>"
-    parts: list[Any] = [
-        Paragraph(title, styles["role"]),
-        Paragraph(f"{escape(entry['period'])} | {escape(entry['location'])}", styles["meta"]),
-    ]
-    for highlight in entry["highlights"]:
-        parts.append(Paragraph(escape(highlight), styles["bullet"], bulletText="-"))
-    return parts
-
-
-def build_resume(content: dict[str, Any], output_path: Path) -> None:
-    styles = make_styles()
+def build_resume(content, output_path):
     resume = content["resume"]
+    primary, *independent = resume["experience"]
+    sections = resume["engineeringSections"]
     links = content["links"]
     output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    document = ResumeDocument(
-        str(output_path),
-        title=f"{content['name']} - {content['headline']} Resume",
-        author=content["name"],
+    document = SimpleDocTemplate(
+        str(output_path), pagesize=A4,
+        leftMargin=17 * mm, rightMargin=17 * mm,
+        topMargin=15 * mm, bottomMargin=20 * mm,
+        title=f"{content['name']} - Lead AI/ML Engineer Resume",
+        author=content["name"], subject=resume["headline"],
+        invariant=1,
     )
-
-    story: list[Any] = [
-        Paragraph("GARETH64 / READY.", styles["machine"]),
-        Paragraph(escape(content["name"]), styles["name"]),
-        Paragraph(escape(content["headline"]), styles["headline"]),
-        Paragraph(escape(content["differentiator"]), styles["lead"]),
-        Paragraph(
-            " &nbsp;|&nbsp; ".join(
-                [
-                    escape(content["location"]),
-                    link(f"mailto:{content['email']}", content["email"]),
-                    link(links["linkedin"], "LinkedIn"),
-                    link(links["github"], "GitHub"),
-                    link(links["site"], "garethbeall.com"),
-                ]
-            ),
-            styles["contact"],
-        ),
-        Spacer(1, 6),
-        section_heading("Profile", styles),
-        Spacer(1, 5),
-        Paragraph(escape(resume["profile"]), styles["body"]),
-        section_heading("Experience", styles),
-        Spacer(1, 6),
-        *experience_block(resume["experience"][0], styles),
+    contact = (
+        f'<link href="{escape(links["site"])}" color="#315E58"><b>garethbeall.com</b></link>'
+        f' &nbsp; | &nbsp; <link href="mailto:{escape(content["email"])}">{escape(content["email"])}</link>'
+        f'<br/>{escape(content["location"])} &nbsp; | &nbsp; '
+        f'<link href="{escape(links["linkedin"])}">LinkedIn</link> &nbsp; | &nbsp; '
+        f'<link href="{escape(links["github"])}">github.com/gazb23</link>'
+    )
+    story = [
+        para(content["name"], "name"),
+        para(resume["headline"], "headline"),
+        Paragraph(contact, styles["contact"]),
+        para(resume["profile"]),
+        para("Experience", "section"),
+        para(f'{primary["role"]} | {primary["organisation"]}', "role"),
+        para(f'{primary["period"]} | {primary["location"]}', "meta"),
+        para(primary["highlights"][0]),
+        *(bullet(text) for text in primary["highlights"][1:]),
     ]
-
-    for entry in resume["experience"][1:]:
-        story.extend(experience_block(entry, styles))
-        story.append(Spacer(1, 5))
-
-    story.extend(
-        [
-            PageBreak(),
-            section_heading("Selected system", styles),
-            Spacer(1, 6),
-            Paragraph(
-                f"{escape(content['iris']['name'])} <font color='#525C56'>/ {escape(content['iris']['label'])}</font>",
-                styles["role"],
-            ),
-            Paragraph(escape(content["iris"]["summary"]), styles["body"]),
-        ]
-    )
-
-    chapter_rows = []
-    for title, text in content["iris"]["chapters"]:
-        chapter_rows.append(
-            [
-                Paragraph(escape(title.upper()), styles["machine"]),
-                Paragraph(escape(text), styles["itemText"]),
-            ]
-        )
-    chapter_table = Table(chapter_rows, colWidths=[30 * mm, 146 * mm])
-    chapter_table.setStyle(
-        TableStyle(
-            [
-                ("LINEBELOW", (0, 0), (-1, -2), 0.35, HAIRLINE),
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-                ("TOPPADDING", (0, 0), (-1, -1), 3.5),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 3.5),
-            ]
-        )
-    )
-
-    story.extend([chapter_table, section_heading("Capabilities", styles), Spacer(1, 6)])
-    capability_rows = []
-    for title, text in resume["capabilities"]:
-        capability_rows.append(
-            [
-                Paragraph(escape(title), styles["itemTitle"]),
-                Paragraph(escape(text), styles["itemText"]),
-            ]
-        )
-    capability_table = Table(capability_rows, colWidths=[38 * mm, 138 * mm])
-    capability_table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, -1), PALE_MOSS),
-                ("BOX", (0, 0), (-1, -1), 0.5, HAIRLINE),
-                ("INNERGRID", (0, 0), (-1, -1), 0.35, HAIRLINE),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 7),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 7),
-                ("TOPPADDING", (0, 0), (-1, -1), 5),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-            ]
-        )
-    )
-    story.extend([capability_table, Spacer(1, 4), section_heading("Selected product work", styles), Spacer(1, 6)])
-
-    product_cells = []
-    for product in content["products"]:
-        product_cells.append(
-            [
-                Paragraph(link(product["href"], product["name"]), styles["itemTitle"]),
-                Paragraph(escape(product["role"]), styles["meta"]),
-                Paragraph(escape(product["description"]), styles["itemText"]),
-            ]
-        )
-    # Lay products out two per row so any count fits the page width.
-    per_row = 2
-    cell_width = 176 / per_row
-    product_rows = [product_cells[i : i + per_row] for i in range(0, len(product_cells), per_row)]
-    if len(product_rows[-1]) < per_row:
-        product_rows[-1].extend([""] * (per_row - len(product_rows[-1])))
-    product_table = Table(product_rows, colWidths=[cell_width * mm] * per_row)
-    product_table.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("BOX", (0, 0), (-1, -1), 0.5, HAIRLINE),
-                ("INNERGRID", (0, 0), (-1, -1), 0.5, HAIRLINE),
-                ("LEFTPADDING", (0, 0), (-1, -1), 7),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 7),
-                ("TOPPADDING", (0, 0), (-1, -1), 7),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-            ]
-        )
-    )
-    story.extend([product_table, Spacer(1, 4), section_heading("Education", styles), Spacer(1, 6)])
-
+    for group in sections[:3]:
+        story.extend(section(group))
+    story.extend([
+        PageBreak(), para(content["name"], "continued"),
+        para("IRIS engineering | Queensland Health | Continued", "meta"),
+    ])
+    for group in sections[3:]:
+        story.extend(section(group))
+    story.append(para("Independent work", "section"))
+    for job in independent:
+        if job["organisation"] == "Independent projects":
+            story.append(para(f'{job["role"]} | {job["period"]}', "role"))
+        else:
+            story.extend([
+                para(f'{job["role"]} | {job["organisation"]}', "role"),
+                para(job["period"], "meta"),
+            ])
+        story.extend(bullet(text) for text in job["highlights"])
+    story.append(para("Technical experience", "section"))
+    for title, description in resume["capabilities"]:
+        story.append(Paragraph(f'<b>{escape(title)}:</b> {escape(description)}', styles["body"]))
     education = resume["education"]
-    education_table = Table(
-        [
-            [
-                Paragraph(
-                    f"{escape(education['qualification'])}<br/><font color='#525C56'>{escape(education['institution'])}</font>",
-                    styles["itemTitle"],
-                ),
-                Paragraph(escape(education["year"]), styles["rightMeta"]),
-            ]
-        ],
-        colWidths=[146 * mm, 30 * mm],
-    )
-    education_table.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("TOPPADDING", (0, 0), (-1, -1), 0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-            ]
-        )
-    )
-    story.extend([education_table, Spacer(1, 8)])
-    interactive_note = (
-        f'THIS RESUME RUNS AS A PLAYABLE COMMODORE 64 AT {link(links["site"], "GARETHBEALL.COM", "#FFFFFF")}. '
-        "LOAD A TAPE, ASK THE AI ANYTHING."
-    )
-    story.append(
-        Table(
-            [[Paragraph(interactive_note, styles["band"])]],
-            colWidths=[176 * mm],
-            style=TableStyle(
-                [
-                    ("BACKGROUND", (0, 0), (-1, -1), MOSS),
-                    ("TEXTCOLOR", (0, 0), (-1, -1), WHITE),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 9),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 9),
-                    ("TOPPADDING", (0, 0), (-1, -1), 8),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                ]
-            ),
-        )
-    )
-
-    document.build(story)
-    print(f"Built {output_path}")
+    story.extend([
+        para("Clinical background and education", "section"),
+        para(resume["clinicalBackground"]),
+        para(f'{education["qualification"]} | {education["institution"]} | {education["year"]}'),
+    ])
+    document.build(story, onFirstPage=footer, onLaterPages=footer)
+    pages = PdfReader(output_path).pages
+    if len(pages) != 2:
+        raise ValueError(f"Expected a two-page resume, got {len(pages)}; review the layout before publishing.")
+    print(f"Built {output_path} ({len(pages)} pages)")
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Build the Gareth64 PDF resume from canonical site content.")
+def main():
+    parser = argparse.ArgumentParser(description="Build the public resume from canonical site content.")
     parser.add_argument("--content", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
-    arguments = parser.parse_args()
-
-    with arguments.content.open("r", encoding="utf-8") as stream:
-        content = json.load(stream)
-    build_resume(content, arguments.output)
+    args = parser.parse_args()
+    build_resume(json.loads(args.content.read_text()), args.output)
 
 
 if __name__ == "__main__":
